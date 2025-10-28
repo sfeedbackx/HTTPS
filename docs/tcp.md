@@ -82,4 +82,26 @@ applications that can’t afford to lose or disorder data.
 this show how the data is warped
 ## Acknowledgment and Sequence Number
 
+### Acknowledgment Number (ACK)
+The ``acknowledgment number`` is used by the ``receiver`` to tell the ``sender`` which bytes have been
+successfully received. It indicates the next expected sequence number—meaning 
+>“I’ve received everything up to this point; send me data starting here.”
+
+ACK numbers are only valid when the ACK flag in the TCP header is set (which is almost always
+after the connection is established).
+***Example:***
+If a receiver gets bytes 5000–5999, it sends back an ACK with number 6000, meaning “I’m ready for
+byte 6000 onward.”
+
+### Sequence Number
+
+Every byte of data transmitted in a ``TCP`` connection is assigned a sequence number.
+The sequence number in a ``TCP`` segment indicates the position of the first byte of that segment in
+the overall data stream. This allows the ``receiver`` to reassemble segments in the correct order,
+even if they arrive out of sequence. The initial ``sequence number`` (ISN) is randomly chosen at the
+start of a connection ``(during the 3-way handshake)`` for security and uniqueness.
+
+***Example:***
+If a sender transmits 1000 bytes starting at sequence number 5000, those bytes are numbered 5000
+to 5999. The next segment will start with sequence number 6000.
 
