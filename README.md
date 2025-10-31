@@ -28,26 +28,26 @@ file : snake_case with the topic is first for example : ``tcp_sync``
 
 # Epics
 
-1. TCP
+1. [x] TCP
     - what is tcp
     - sequence diagram and the flow of TCP
     - automata
 
-2. HTTP
+2. [] HTTP
     - what is HTTP
     - sequence diagram and the flow of HTTP
     - automata
 
-3. SSL/TLS
+3. [] SSL/TLS
     - what is TLS
     - sequence diagram and the flow of TLS
     - automata
 
-4. HTTPS
+4. [] HTTPS
     - what is HTTPS
     - sequence diagram and the flow of HTTPS
     - automata
-5. ATTACKS
+5. [] ATTACKS
     - popular attack on HTTPS (we can target TCP & TLS)
     - simulating and see where we get blocked
 
