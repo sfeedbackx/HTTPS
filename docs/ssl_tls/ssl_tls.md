@@ -248,9 +248,9 @@ Alice                                  Bob
   │ Secret: a=6                         │ Secret: b=15
   │ Computes: A = 5^6 mod 23 = 8        │ Computes: B = 5^15 mod 23 = 19
   │                                     │
-  │ ──────────── A=8 ─────────────────→│  (attacker sees 8)
+  │ ──────────── A=8 ─────────────────→ │  (attacker sees 8)
   │                                     │
-  │ ←──────────── B=19 ─────────────── │  (attacker sees 19)
+  │ ←──────────── B=19 ───────────────  │  (attacker sees 19)
   │                                     │
   │ Computes: 19^6 mod 23 = 2           │ Computes: 8^15 mod 23 = 2
   │                                     │
@@ -634,3 +634,7 @@ For larger data:
 └──────────────────────────────────────────────────────┘
 ```
 
+## 5. Automata Flow for TLS
+
+
+![TLS  Automata](./tls.png)
