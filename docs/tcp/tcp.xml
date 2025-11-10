@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.6//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_6.dtd'>
+<nta>
+	<declaration>// Place global declarations here.
+chan syn;
+chan synack;
+chan ack;
+chan rest;
+const int TIMEOUT = 10;
+const int RETRY_TIME = 5;
+const int MAX_RETRIES = 5;</declaration>
+	<template>
+		<name>TcpServer</name>
+		<declaration>clock s;
+int retry_count_s = 0;</declaration>
+		<location id="id0" x="-400" y="-50">
+			<name x="-451" y="-16">LISTEN</name>
+		</location>
+		<location id="id1" x="-221" y="-59">
+			<name x="-255" y="-93">SYN_RCVD</name>
+		</location>
+		<location id="id2" x="340" y="-51">
+			<name x="306" y="-85">ESTABLISHED</name>
+		</location>
+		<location id="id3" x="-68" y="-59">
+			<name x="-93" y="-102">SYNACK_SENT</name>
+			<label kind="invariant" x="-161" y="-127">s &lt;= RETRY_TIME &amp;&amp; retry_count_s &lt; MAX_RETRIES</label>
+		</location>
+		<init ref="id0"/>
+		<transition id="id4">
+			<source ref="id1"/>
+			<target ref="id0"/>
+			<label kind="synchronisation" x="-272" y="8">rest?</label>
+			<nail x="-289" y="34"/>
+		</transition>
+		<transition id="id5">
+			<source ref="id3"/>
+			<target ref="id3"/>
+			<label kind="guard" x="-289" y="59">s &gt;= RETRY_TIME &amp;&amp; retry_count_s &lt; MAX_RETRIES</label>
+			<label kind="synchronisation" x="-127" y="25">synack!</label>
+			<label kind="assignment" x="-42" y="25">s = 0, retry_count_s++</label>
+			<nail x="-170" y="51"/>
+			<nail x="-51" y="51"/>
+		</transition>
+		<transition id="id6">
+			<source ref="id1"/>
+			<target ref="id3"/>
+			<label kind="synchronisation" x="-170" y="-85">synack!</label>
+			<label kind="assignment" x="-246" y="-51">s=0,retry_count_s=0</label>
+		</transition>
+		<transition id="id7">
+			<source ref="id3"/>
+			<target ref="id0"/>
+			<label kind="guard" x="-467" y="-229">s &gt;= RETRY_TIME &amp;&amp; retry_count_s &gt;= MAX_RETRIES</label>
+			<label kind="synchronisation" x="-263" y="-187">rest!</label>
+			<nail x="-76" y="-68"/>
+			<nail x="-315" y="-186"/>
+		</transition>
+		<transition id="id8">
+			<source ref="id3"/>
+			<target ref="id2"/>
+			<label kind="guard" x="8" y="-51">retry_count_s &lt; MAX_RETRIES</label>
+			<label kind="synchronisation" x="119" y="-85">ack?</label>
+		</transition>
+		<transition id="id9">
+			<source ref="id0"/>
+			<target ref="id1"/>
+			<label kind="synchronisation" x="-382" y="-67">syn?</label>
+		</transition>
+	</template>
+	<template>
+		<name x="5" y="5">TcpClient</name>
+		<declaration>// Place local declarations here.
+clock t;
+int retry_count = 0;
+</declaration>
+		<location id="id10" x="-365" y="-102">
+			<name x="-391" y="-136">CLOSED</name>
+		</location>
+		<location id="id11" x="-119" y="-102">
+			<name x="-153" y="-136">SYN_SENT</name>
+			<label kind="invariant" x="-212" y="-161">retry_count&lt;MAX_RETRIES &amp;&amp; t&lt;=RETRY_TIME</label>
+		</location>
+		<location id="id12" x="306" y="-102">
+			<name x="280" y="-161">ACK_SEND</name>
+			<urgent/>
+		</location>
+		<location id="id13" x="535" y="-93">
+			<name x="518" y="-136">ESTABLISHED</name>
+		</location>
+		<location id="id14" x="306" y="-102">
+			<committed/>
+		</location>
+		<init ref="id10"/>
+		<transition id="id15">
+			<source ref="id12"/>
+			<target ref="id10"/>
+			<label kind="synchronisation" x="18" y="-199">rest?</label>
+			<nail x="0" y="-263"/>
+		</transition>
+		<transition id="id16">
+			<source ref="id14"/>
+			<target ref="id12"/>
+		</transition>
+		<transition id="id17">
+			<source ref="id14"/>
+			<target ref="id12"/>
+		</transition>
+		<transition id="id18">
+			<source ref="id12"/>
+			<target ref="id14"/>
+		</transition>
+		<transition id="id19">
+			<source ref="id12"/>
+			<target ref="id14"/>
+		</transition>
+		<transition id="id20">
+			<source ref="id14"/>
+			<target ref="id13"/>
+			<label kind="guard" x="331" y="-127">retry_count&lt;MAX_RETRIES</label>
+			<label kind="synchronisation" x="357" y="-76">ack!</label>
+		</transition>
+		<transition id="id21">
+			<source ref="id14"/>
+			<target ref="id12"/>
+		</transition>
+		<transition id="id22">
+			<source ref="id11"/>
+			<target ref="id11"/>
+			<label kind="guard" x="-195" y="-8">t &gt;= RETRY_TIME &amp;&amp; retry_count &lt; MAX_RETRIES</label>
+			<label kind="synchronisation" x="-127" y="-42">syn!</label>
+			<label kind="assignment" x="-127" y="8">t = 0, retry_count++</label>
+			<nail x="-144" y="-8"/>
+			<nail x="-85" y="-25"/>
+		</transition>
+		<transition id="id23">
+			<source ref="id11"/>
+			<target ref="id10"/>
+			<label kind="guard" x="-289" y="51">t &gt;= RETRY_TIME &amp;&amp; retry_count&gt;=MAX_RETRIES</label>
+			<label kind="synchronisation" x="-220" y="-42">rest!</label>
+			<nail x="-238" y="51"/>
+		</transition>
+		<transition id="id24">
+			<source ref="id11"/>
+			<target ref="id12"/>
+			<label kind="guard" x="-42" y="-85">t &lt;= RETRY_TIME &amp;&amp; retry_count&lt;MAX_RETRIES</label>
+			<label kind="synchronisation" x="93" y="-127">synack?</label>
+			<label kind="assignment" x="51" y="-102">t=0,retry_count=0</label>
+		</transition>
+		<transition id="id25">
+			<source ref="id10"/>
+			<target ref="id11"/>
+			<label kind="synchronisation" x="-238" y="-136">syn!</label>
+			<label kind="assignment" x="-297" y="-102">t=0,retry_count=0</label>
+		</transition>
+	</template>
+	<system>// Place template instantiations here.
+C = TcpClient();
+S = TcpServer();
+// List one or more processes to be composed into a system.
+system C,S;
+</system>
+	<queries>
+		<query>
+			<formula>E&lt;&gt; C.ESTABLISHED and S.ESTABLISHED</formula>
+			<comment>if client established connection the server should also establish connection</comment>
+			<result outcome="success" type="quality" timestamp="2025-11-10 07:43:20 +0100">
+			</result>
+		</query>
+		<query>
+			<formula>A[] (C.SYN_SENT imply C.t &lt;= TIMEOUT)</formula>
+			<comment/>
+			<result outcome="success" type="quality" timestamp="2025-11-10 07:46:14 +0100">
+			</result>
+		</query>
+		<query>
+			<formula>A[] not (C.ESTABLISHED and S.LISTEN)</formula>
+			<comment/>
+			<result outcome="success" type="quality" timestamp="2025-11-10 07:45:54 +0100">
+			</result>
+		</query>
+		<query>
+			<formula>A[] C.retry_count &lt; MAX_RETRIES</formula>
+			<comment/>
+			<result outcome="success" type="quality" timestamp="2025-11-10 07:47:03 +0100">
+			</result>
+		</query>
+		<query>
+			<formula>A[] (C.ESTABLISHED imply S.ESTABLISHED)</formula>
+			<comment/>
+			<result outcome="success" type="quality" timestamp="2025-11-10 07:43:17 +0100">
+			</result>
+		</query>
+		<query>
+			<formula>A[] (C.retry_count &gt;= MAX_RETRIES imply  C.CLOSED and S.LISTEN)</formula>
+			<comment/>
+			<result outcome="success" type="quality" timestamp="2025-11-10 07:52:38 +0100">
+			</result>
+		</query>
+	</queries>
+</nta>
