@@ -145,140 +145,103 @@ int retry_count = 0;
 			<name x="-536" y="-153">SYN_SENT</name>
 			<label kind="invariant" x="-595" y="-178">retry_count&lt;MAX_RETRIES &amp;&amp; t&lt;=RETRY_TIME</label>
 		</location>
-		<location id="id24" x="-77" y="-119">
-			<name x="-103" y="-178">ACK_SEND</name>
-			<urgent/>
+		<location id="id24" x="-93" y="-136">
+			<name x="-153" y="-187">ACK_SEND</name>
+			<committed/>
 		</location>
 		<location id="id25" x="152" y="-110">
 			<name x="135" y="-153">ESTABLISHED</name>
 		</location>
-		<location id="id26" x="-77" y="-119">
-			<committed/>
-		</location>
-		<location id="id27" x="272" y="-110">
+		<location id="id26" x="272" y="-110">
 			<name x="238" y="-161">DATA_SENT</name>
 			<label kind="invariant" x="221" y="-204">retry_count&lt;MAX_RETRIES &amp;&amp; t&lt;=RETRY_TIME</label>
 		</location>
-		<location id="id28" x="442" y="-119">
+		<location id="id27" x="442" y="-119">
 			<name x="399" y="-170">DATA_ACK</name>
 		</location>
-		<location id="id29" x="637" y="-136">
+		<location id="id28" x="637" y="-136">
 			<name x="619" y="-178">DATA_REC</name>
 		</location>
-		<location id="id30" x="661" y="94">
+		<location id="id29" x="661" y="94">
 			<name x="651" y="60">FIN_SENT</name>
 			<label kind="invariant" x="680" y="85">retry_count&lt;MAX_RETRIES &amp;&amp; t&lt;=RETRY_TIME</label>
 		</location>
 		<init ref="id22"/>
-		<transition id="id31">
-			<source ref="id28"/>
+		<transition id="id30">
+			<source ref="id27"/>
 			<target ref="id22"/>
 			<label kind="synchronisation" x="-41" y="-361">rest?</label>
 			<nail x="-59" y="-569"/>
 		</transition>
-		<transition id="id32">
-			<source ref="id30"/>
+		<transition id="id31">
+			<source ref="id29"/>
 			<target ref="id22"/>
 			<label kind="guard" x="-569" y="306">t &gt; RETRY_TIME &amp;&amp; retry_count &gt;= MAX_RETRIES</label>
 			<nail x="-705" y="289"/>
 			<nail x="-969" y="8"/>
 		</transition>
-		<transition id="id33">
-			<source ref="id26"/>
-			<target ref="id24"/>
-		</transition>
-		<transition id="id34">
-			<source ref="id24"/>
-			<target ref="id26"/>
-		</transition>
-		<transition id="id35">
-			<source ref="id30"/>
-			<target ref="id30"/>
+		<transition id="id32">
+			<source ref="id29"/>
+			<target ref="id29"/>
 			<label kind="synchronisation" x="535" y="136">finack!</label>
 			<label kind="assignment" x="535" y="153">t = 0, retry_count++</label>
 			<nail x="517" y="213"/>
 			<nail x="687" y="213"/>
 		</transition>
-		<transition id="id36">
-			<source ref="id27"/>
+		<transition id="id33">
+			<source ref="id26"/>
 			<target ref="id22"/>
 			<label kind="guard" x="-24" y="-356">t &gt;= RETRY_TIME &amp;&amp; retry_count &gt;= MAX_RETRIES</label>
 			<label kind="synchronisation" x="-42" y="-425">rest!</label>
 			<nail x="-42" y="-535"/>
 		</transition>
-		<transition id="id37">
-			<source ref="id27"/>
-			<target ref="id27"/>
+		<transition id="id34">
+			<source ref="id26"/>
+			<target ref="id26"/>
 			<label kind="guard" x="-93" y="-42">t &gt;= RETRY_TIME &amp;&amp; retry_count &lt; MAX_RETRIES</label>
 			<label kind="synchronisation" x="297" y="-34">syn!</label>
 			<label kind="assignment" x="263" y="25">t = 0, retry_count++</label>
 			<nail x="289" y="34"/>
 			<nail x="365" y="-17"/>
 		</transition>
-		<transition id="id38">
-			<source ref="id30"/>
+		<transition id="id35">
+			<source ref="id29"/>
 			<target ref="id22"/>
-			<label kind="guard" x="-255" y="42">retry_count&lt;MAX_RETRIES &amp;&amp; t&lt;=RETRY_TIME</label>
+			<label kind="guard" x="-119" y="68">retry_count&lt;MAX_RETRIES &amp;&amp; t&lt;=RETRY_TIME</label>
 			<label kind="synchronisation" x="-271" y="89">ack?</label>
 			<nail x="-289" y="127"/>
 			<nail x="-799" y="76"/>
 		</transition>
-		<transition id="id39">
-			<source ref="id29"/>
-			<target ref="id30"/>
+		<transition id="id36">
+			<source ref="id28"/>
+			<target ref="id29"/>
 			<label kind="synchronisation" x="654" y="-42">finack!</label>
 			<label kind="assignment" x="501" y="-8">t=0,retry_count=0</label>
 		</transition>
-		<transition id="id40">
-			<source ref="id28"/>
-			<target ref="id29"/>
-			<label kind="synchronisation" x="460" y="-144">ack!</label>
-		</transition>
-		<transition id="id41">
+		<transition id="id37">
 			<source ref="id27"/>
 			<target ref="id28"/>
+			<label kind="synchronisation" x="460" y="-144">ack!</label>
+		</transition>
+		<transition id="id38">
+			<source ref="id26"/>
+			<target ref="id27"/>
 			<label kind="guard" x="289" y="-102">t &lt;= RETRY_TIME &amp;&amp; retry_count&lt;MAX_RETRIES</label>
 			<label kind="synchronisation" x="290" y="-131">synack?</label>
 		</transition>
-		<transition id="id42">
+		<transition id="id39">
 			<source ref="id25"/>
-			<target ref="id27"/>
+			<target ref="id26"/>
 			<label kind="synchronisation" x="195" y="-136">syn!</label>
 			<label kind="assignment" x="127" y="-93">t=0,retry_count=0</label>
 		</transition>
-		<transition id="id43">
+		<transition id="id40">
 			<source ref="id24"/>
-			<target ref="id22"/>
-			<label kind="synchronisation" x="-374" y="-433">rest?</label>
-			<nail x="-383" y="-280"/>
-		</transition>
-		<transition id="id44">
-			<source ref="id26"/>
-			<target ref="id24"/>
-		</transition>
-		<transition id="id45">
-			<source ref="id26"/>
-			<target ref="id24"/>
-		</transition>
-		<transition id="id46">
-			<source ref="id24"/>
-			<target ref="id26"/>
-		</transition>
-		<transition id="id47">
-			<source ref="id24"/>
-			<target ref="id26"/>
-		</transition>
-		<transition id="id48">
-			<source ref="id26"/>
 			<target ref="id25"/>
-			<label kind="guard" x="-52" y="-144">retry_count&lt;MAX_RETRIES</label>
+			<label kind="guard" x="-59" y="-178">retry_count&lt;MAX_RETRIES</label>
 			<label kind="synchronisation" x="-8" y="-102">ack!</label>
 		</transition>
-		<transition id="id49">
-			<source ref="id26"/>
-			<target ref="id24"/>
-		</transition>
-		<transition id="id50">
+		<transition id="id41">
 			<source ref="id23"/>
 			<target ref="id23"/>
 			<label kind="guard" x="-578" y="-25">t &gt;= RETRY_TIME &amp;&amp; retry_count &lt; MAX_RETRIES</label>
@@ -287,21 +250,21 @@ int retry_count = 0;
 			<nail x="-527" y="-25"/>
 			<nail x="-468" y="-42"/>
 		</transition>
-		<transition id="id51">
+		<transition id="id42">
 			<source ref="id23"/>
 			<target ref="id22"/>
 			<label kind="guard" x="-672" y="34">t &gt;= RETRY_TIME &amp;&amp; retry_count&gt;=MAX_RETRIES</label>
 			<label kind="synchronisation" x="-603" y="-59">rest!</label>
 			<nail x="-621" y="34"/>
 		</transition>
-		<transition id="id52">
+		<transition id="id43">
 			<source ref="id23"/>
 			<target ref="id24"/>
 			<label kind="guard" x="-425" y="-102">t &lt;= RETRY_TIME &amp;&amp; retry_count&lt;MAX_RETRIES</label>
 			<label kind="synchronisation" x="-290" y="-144">synack?</label>
 			<label kind="assignment" x="-332" y="-119">t=0,retry_count=0</label>
 		</transition>
-		<transition id="id53">
+		<transition id="id44">
 			<source ref="id22"/>
 			<target ref="id23"/>
 			<label kind="synchronisation" x="-621" y="-153">syn!</label>
@@ -318,13 +281,13 @@ system C,S;
 		<query>
 			<formula>A[] not deadlock</formula>
 			<comment/>
-			<result outcome="success" type="quality" timestamp="2025-11-10 14:49:50 +0100">
+			<result outcome="success" type="quality" timestamp="2025-11-11 19:36:17 +0100">
 			</result>
 		</query>
 		<query>
 			<formula>E&lt;&gt; C.ESTABLISHED and S.ESTABLISHED</formula>
 			<comment>if client established connection the server should also establish connection</comment>
-			<result outcome="success" type="quality" timestamp="2025-11-10 07:43:20 +0100">
+			<result outcome="success" type="quality" timestamp="2025-11-11 19:36:21 +0100">
 			</result>
 		</query>
 		<query>
@@ -336,7 +299,7 @@ system C,S;
 		<query>
 			<formula>A[] not (C.ESTABLISHED and S.LISTEN)</formula>
 			<comment/>
-			<result outcome="success" type="quality" timestamp="2025-11-10 07:45:54 +0100">
+			<result outcome="success" type="quality" timestamp="2025-11-11 19:36:23 +0100">
 			</result>
 		</query>
 		<query>
@@ -348,13 +311,13 @@ system C,S;
 		<query>
 			<formula>A[] (C.ESTABLISHED imply S.ESTABLISHED)</formula>
 			<comment/>
-			<result outcome="success" type="quality" timestamp="2025-11-10 07:43:17 +0100">
+			<result outcome="success" type="quality" timestamp="2025-11-11 19:36:25 +0100">
 			</result>
 		</query>
 		<query>
 			<formula>A[] (C.retry_count &gt;= MAX_RETRIES imply  C.CLOSED and S.LISTEN)</formula>
 			<comment/>
-			<result outcome="success" type="quality" timestamp="2025-11-10 07:52:38 +0100">
+			<result outcome="success" type="quality" timestamp="2025-11-11 19:36:26 +0100">
 			</result>
 		</query>
 	</queries>
