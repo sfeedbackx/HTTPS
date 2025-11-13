@@ -147,7 +147,6 @@ int retry_count = 0;
 		</location>
 		<location id="id24" x="-93" y="-136">
 			<name x="-153" y="-187">ACK_SEND</name>
-			<committed/>
 		</location>
 		<location id="id25" x="152" y="-110">
 			<name x="135" y="-153">ESTABLISHED</name>
