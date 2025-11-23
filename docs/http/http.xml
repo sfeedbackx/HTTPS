@@ -1,0 +1,288 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.6//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_6.dtd'>
+<nta>
+	<declaration>// Place global declarations here.
+</declaration>
+	<template>
+		<name>http_server</name>
+		<location id="id0" x="-442" y="-391">
+			<name x="-425" y="-400">Auth_ACCESS_GIVEN</name>
+		</location>
+		<location id="id1" x="-867" y="-476">
+			<name x="-909" y="-518">ERROR_FAILURE</name>
+		</location>
+		<location id="id2" x="-671" y="-587">
+			<name x="-756" y="-663">TCP_CONNECTION</name>
+		</location>
+		<location id="id3" x="-867" y="-587">
+			<name x="-901" y="-646">CLOSED</name>
+		</location>
+		<location id="id4" x="-671" y="59">
+			<name x="-731" y="85">RESPONSE_SENT</name>
+		</location>
+		<location id="id5" x="-833" y="-60">
+			<name x="-858" y="-119">DATA_VALID</name>
+		</location>
+		<location id="id6" x="-671" y="-77">
+			<name x="-688" y="-119">NO_DATA</name>
+		</location>
+		<location id="id7" x="-527" y="-77">
+			<name x="-544" y="-136">REDIRECTION</name>
+		</location>
+		<location id="id8" x="-833" y="-213">
+			<name x="-875" y="-255">BODY_RECIVED</name>
+		</location>
+		<location id="id9" x="-671" y="-391">
+			<name x="-715" y="-434">REQUEST_RECIVED</name>
+		</location>
+		<location id="id10" x="-671" y="-476">
+			<name x="-731" y="-518">LISNING_REQUEST</name>
+		</location>
+		<init ref="id3"/>
+		<transition id="id11">
+			<source ref="id0"/>
+			<target ref="id1"/>
+			<nail x="-442" y="-339"/>
+			<nail x="-867" y="-348"/>
+		</transition>
+		<transition id="id12">
+			<source ref="id0"/>
+			<target ref="id2"/>
+		</transition>
+		<transition id="id13">
+			<source ref="id1"/>
+			<target ref="id2"/>
+		</transition>
+		<transition id="id14">
+			<source ref="id1"/>
+			<target ref="id3"/>
+		</transition>
+		<transition id="id15">
+			<source ref="id4"/>
+			<target ref="id3"/>
+			<nail x="-671" y="144"/>
+			<nail x="-1164" y="144"/>
+			<nail x="-1164" y="-586"/>
+		</transition>
+		<transition id="id16">
+			<source ref="id4"/>
+			<target ref="id2"/>
+			<nail x="-671" y="144"/>
+			<nail x="-213" y="152"/>
+			<nail x="-204" y="-587"/>
+		</transition>
+		<transition id="id17">
+			<source ref="id5"/>
+			<target ref="id4"/>
+			<nail x="-833" y="59"/>
+		</transition>
+		<transition id="id18">
+			<source ref="id6"/>
+			<target ref="id4"/>
+		</transition>
+		<transition id="id19">
+			<source ref="id7"/>
+			<target ref="id4"/>
+			<nail x="-527" y="59"/>
+		</transition>
+		<transition id="id20">
+			<source ref="id8"/>
+			<target ref="id1"/>
+			<nail x="-977" y="-213"/>
+			<nail x="-977" y="-476"/>
+		</transition>
+		<transition id="id21">
+			<source ref="id9"/>
+			<target ref="id7"/>
+			<nail x="-671" y="-306"/>
+			<nail x="-527" y="-306"/>
+		</transition>
+		<transition id="id22">
+			<source ref="id9"/>
+			<target ref="id0"/>
+		</transition>
+		<transition id="id23">
+			<source ref="id8"/>
+			<target ref="id5"/>
+		</transition>
+		<transition id="id24">
+			<source ref="id9"/>
+			<target ref="id8"/>
+			<nail x="-671" y="-306"/>
+			<nail x="-833" y="-306"/>
+		</transition>
+		<transition id="id25">
+			<source ref="id9"/>
+			<target ref="id6"/>
+			<nail x="-671" y="-374"/>
+		</transition>
+		<transition id="id26">
+			<source ref="id9"/>
+			<target ref="id1"/>
+			<nail x="-680" y="-391"/>
+		</transition>
+		<transition id="id27">
+			<source ref="id10"/>
+			<target ref="id1"/>
+		</transition>
+		<transition id="id28">
+			<source ref="id10"/>
+			<target ref="id9"/>
+		</transition>
+		<transition id="id29">
+			<source ref="id2"/>
+			<target ref="id10"/>
+		</transition>
+		<transition id="id30">
+			<source ref="id3"/>
+			<target ref="id2"/>
+		</transition>
+	</template>
+	<template>
+		<name x="5" y="5">http_client</name>
+		<declaration>// Place local declarations here.
+</declaration>
+		<location id="id31" x="-493" y="-391">
+			<name x="-527" y="-450">CLOSED</name>
+		</location>
+		<location id="id32" x="-297" y="-391">
+			<name x="-382" y="-467">CONNECTION_REQUESTED</name>
+		</location>
+		<location id="id33" x="-297" y="-280">
+			<name x="-356" y="-331">NEED_REQUEST</name>
+		</location>
+		<location id="id34" x="-297" y="-195">
+			<name x="-341" y="-238">REQUEST_SENT</name>
+		</location>
+		<location id="id35" x="-493" y="-280">
+			<name x="-535" y="-322">ERROR_FAILURE</name>
+		</location>
+		<location id="id36" x="-459" y="-17">
+			<name x="-510" y="-68">BODY_REQUESTED</name>
+		</location>
+		<location id="id37" x="-68" y="-195">
+			<name x="-51" y="-204">Auth_ACCESS_OBTAINED</name>
+		</location>
+		<location id="id38" x="-459" y="136">
+			<name x="-486" y="102">DATA_VALID</name>
+		</location>
+		<location id="id39" x="-297" y="119">
+			<name x="-307" y="85">NO_DATA</name>
+		</location>
+		<location id="id40" x="-153" y="119">
+			<name x="-170" y="59">REDIRECTION</name>
+		</location>
+		<location id="id41" x="-297" y="255">
+		</location>
+		<init ref="id31"/>
+		<transition id="id42">
+			<source ref="id37"/>
+			<target ref="id35"/>
+			<nail x="-68" y="-144"/>
+			<nail x="-493" y="-153"/>
+		</transition>
+		<transition id="id43">
+			<source ref="id37"/>
+			<target ref="id32"/>
+		</transition>
+		<transition id="id44">
+			<source ref="id35"/>
+			<target ref="id32"/>
+		</transition>
+		<transition id="id45">
+			<source ref="id35"/>
+			<target ref="id31"/>
+		</transition>
+		<transition id="id46">
+			<source ref="id41"/>
+			<target ref="id31"/>
+			<nail x="-297" y="340"/>
+			<nail x="-773" y="340"/>
+			<nail x="-782" y="-391"/>
+		</transition>
+		<transition id="id47">
+			<source ref="id41"/>
+			<target ref="id32"/>
+			<nail x="-297" y="340"/>
+			<nail x="161" y="348"/>
+			<nail x="170" y="-391"/>
+		</transition>
+		<transition id="id48">
+			<source ref="id38"/>
+			<target ref="id41"/>
+			<nail x="-459" y="255"/>
+		</transition>
+		<transition id="id49">
+			<source ref="id39"/>
+			<target ref="id41"/>
+		</transition>
+		<transition id="id50">
+			<source ref="id40"/>
+			<target ref="id41"/>
+			<nail x="-153" y="255"/>
+		</transition>
+		<transition id="id51">
+			<source ref="id36"/>
+			<target ref="id35"/>
+			<nail x="-603" y="-17"/>
+			<nail x="-603" y="-280"/>
+		</transition>
+		<transition id="id52">
+			<source ref="id34"/>
+			<target ref="id40"/>
+			<nail x="-297" y="-110"/>
+			<nail x="-153" y="-110"/>
+		</transition>
+		<transition id="id53">
+			<source ref="id34"/>
+			<target ref="id37"/>
+		</transition>
+		<transition id="id54">
+			<source ref="id36"/>
+			<target ref="id38"/>
+		</transition>
+		<transition id="id55">
+			<source ref="id34"/>
+			<target ref="id36"/>
+			<nail x="-297" y="-110"/>
+			<nail x="-459" y="-110"/>
+		</transition>
+		<transition id="id56">
+			<source ref="id34"/>
+			<target ref="id39"/>
+			<nail x="-297" y="-178"/>
+		</transition>
+		<transition id="id57">
+			<source ref="id34"/>
+			<target ref="id35"/>
+			<nail x="-306" y="-195"/>
+		</transition>
+		<transition id="id58">
+			<source ref="id33"/>
+			<target ref="id35"/>
+		</transition>
+		<transition id="id59">
+			<source ref="id33"/>
+			<target ref="id34"/>
+		</transition>
+		<transition id="id60">
+			<source ref="id32"/>
+			<target ref="id33"/>
+		</transition>
+		<transition id="id61">
+			<source ref="id31"/>
+			<target ref="id32"/>
+		</transition>
+	</template>
+	<system>// Place template instantiations here.
+Process = Template();
+// List one or more processes to be composed into a system.
+system Process;
+</system>
+	<queries>
+		<query>
+			<formula/>
+			<comment/>
+		</query>
+	</queries>
+</nta>
