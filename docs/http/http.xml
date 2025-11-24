@@ -2,11 +2,54 @@
 <!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.6//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_6.dtd'>
 <nta>
 	<declaration>// Place global declarations here.
+
+//channel
+chan tcpSyn;
+chan tecpEstablished;
+chan req;
+chan body;
+chan red;
+chan noBody;
+chan auth;
+chan error;
+chan newReq;
+chan terminate;
+chan resBody;
+chan resFin;
+// tcp var
+const bool tcpConnectionValid[2] = {false, true};
+bool chosenTcpConnection ;
+int fllowHttpStan;
+int vbody;
+//request
+int reqType;
+
+// response
+int res;
+
+
+
+
+
 </declaration>
 	<template>
-		<name>http_server</name>
+		<name>Http_Server</name>
+		<declaration>//function to handle valid 
+int reqValidOrNot(int req){
+int valid = req%10;
+int res = req/10;
+if (valid){
+return res;
+}else{
+return 3;
+}
+
+}
+
+</declaration>
 		<location id="id0" x="-442" y="-391">
 			<name x="-425" y="-400">Auth_ACCESS_GIVEN</name>
+			<label kind="invariant" x="-433" y="-425">chosenTcpConnection</label>
 		</location>
 		<location id="id1" x="-867" y="-476">
 			<name x="-909" y="-518">ERROR_FAILURE</name>
@@ -21,45 +64,54 @@
 			<name x="-731" y="85">RESPONSE_SENT</name>
 		</location>
 		<location id="id5" x="-833" y="-60">
-			<name x="-858" y="-119">DATA_VALID</name>
+			<name x="-952" y="-68">DATA_VALID</name>
 		</location>
 		<location id="id6" x="-671" y="-77">
-			<name x="-688" y="-119">NO_DATA</name>
+			<name x="-646" y="-85">NO_DATA</name>
 		</location>
 		<location id="id7" x="-527" y="-77">
-			<name x="-544" y="-136">REDIRECTION</name>
+			<name x="-484" y="-85">REDIRECTION</name>
 		</location>
-		<location id="id8" x="-833" y="-213">
-			<name x="-875" y="-255">BODY_RECIVED</name>
+		<location id="id8" x="-833" y="-178">
+			<name x="-875" y="-220">BODY_RECIVED</name>
 		</location>
 		<location id="id9" x="-671" y="-391">
-			<name x="-715" y="-434">REQUEST_RECIVED</name>
+			<name x="-833" y="-399">REQUEST_RECIVED</name>
+			<label kind="invariant" x="-841" y="-382">chosenTcpConnection</label>
 		</location>
 		<location id="id10" x="-671" y="-476">
-			<name x="-731" y="-518">LISNING_REQUEST</name>
+			<name x="-663" y="-484">LISNING_REQUEST</name>
 		</location>
 		<init ref="id3"/>
 		<transition id="id11">
 			<source ref="id0"/>
 			<target ref="id1"/>
-			<nail x="-442" y="-339"/>
-			<nail x="-867" y="-348"/>
+			<label kind="guard" x="-807" y="-365">res == 3</label>
+			<label kind="synchronisation" x="-840" y="-352">error!</label>
+			<nail x="-433" y="-331"/>
+			<nail x="-858" y="-340"/>
 		</transition>
 		<transition id="id12">
 			<source ref="id0"/>
 			<target ref="id2"/>
+			<label kind="guard" x="-544" y="-501">res != 3 &amp;&amp; res == 401</label>
+			<label kind="synchronisation" x="-493" y="-518">newReq!</label>
 		</transition>
 		<transition id="id13">
 			<source ref="id1"/>
 			<target ref="id2"/>
+			<label kind="synchronisation" x="-849" y="-548">newReq?</label>
 		</transition>
 		<transition id="id14">
 			<source ref="id1"/>
 			<target ref="id3"/>
+			<label kind="synchronisation" x="-952" y="-544">terminate?</label>
 		</transition>
 		<transition id="id15">
 			<source ref="id4"/>
 			<target ref="id3"/>
+			<label kind="guard" x="-1088" y="102">res == 3</label>
+			<label kind="synchronisation" x="-1079" y="119">error!</label>
 			<nail x="-671" y="144"/>
 			<nail x="-1164" y="144"/>
 			<nail x="-1164" y="-586"/>
@@ -67,6 +119,8 @@
 		<transition id="id16">
 			<source ref="id4"/>
 			<target ref="id2"/>
+			<label kind="guard" x="-653" y="114">res != 3 &amp;&amp; (res == 200 || res == 301 || res == 204)</label>
+			<label kind="synchronisation" x="-653" y="131">newReq!</label>
 			<nail x="-671" y="144"/>
 			<nail x="-213" y="152"/>
 			<nail x="-204" y="-587"/>
@@ -74,85 +128,121 @@
 		<transition id="id17">
 			<source ref="id5"/>
 			<target ref="id4"/>
+			<label kind="synchronisation" x="-807" y="42">resFin!</label>
 			<nail x="-833" y="59"/>
 		</transition>
 		<transition id="id18">
 			<source ref="id6"/>
 			<target ref="id4"/>
+			<label kind="synchronisation" x="-671" y="-26">resFin!</label>
 		</transition>
 		<transition id="id19">
 			<source ref="id7"/>
 			<target ref="id4"/>
+			<label kind="synchronisation" x="-620" y="34">resFin!</label>
 			<nail x="-527" y="59"/>
 		</transition>
 		<transition id="id20">
 			<source ref="id8"/>
 			<target ref="id1"/>
-			<nail x="-977" y="-213"/>
+			<label kind="guard" x="-951" y="-212">!vbody</label>
+			<label kind="synchronisation" x="-951" y="-195">error!</label>
+			<nail x="-969" y="-178"/>
 			<nail x="-977" y="-476"/>
 		</transition>
 		<transition id="id21">
 			<source ref="id9"/>
 			<target ref="id7"/>
+			<label kind="guard" x="-646" y="-212">chosenTcpConnection &amp;&amp; fllowHttpStan &amp;&amp; (reqType == 3010 || reqType == 3011)</label>
+			<label kind="synchronisation" x="-544" y="-178">red?</label>
+			<label kind="assignment" x="-586" y="-153">res = reqValidOrNot(reqType)</label>
 			<nail x="-671" y="-306"/>
 			<nail x="-527" y="-306"/>
 		</transition>
 		<transition id="id22">
 			<source ref="id9"/>
 			<target ref="id0"/>
+			<label kind="guard" x="-654" y="-374">chosenTcpConnection &amp;&amp; fllowHttpStan &amp;&amp;(reqType == 4010 || reqType == 4011)</label>
+			<label kind="synchronisation" x="-612" y="-408">auth?</label>
+			<label kind="assignment" x="-433" y="-357">res = reqValidOrNot(reqType)</label>
 		</transition>
 		<transition id="id23">
 			<source ref="id8"/>
 			<target ref="id5"/>
+			<label kind="guard" x="-833" y="-161">vbody</label>
+			<label kind="synchronisation" x="-824" y="-144">resBody!</label>
+			<label kind="assignment" x="-943" y="-102">res = reqValidOrNot(reqType)</label>
 		</transition>
 		<transition id="id24">
 			<source ref="id9"/>
 			<target ref="id8"/>
+			<label kind="select" x="-943" y="-314">bv : int[0,1]</label>
+			<label kind="guard" x="-969" y="-263">chosenTcpConnection &amp;&amp; fllowHttpStan &amp;&amp;  (reqType == 2000 || reqType == 2001)</label>
+			<label kind="synchronisation" x="-815" y="-323">body?</label>
+			<label kind="assignment" x="-815" y="-306">vbody = bv</label>
 			<nail x="-671" y="-306"/>
 			<nail x="-833" y="-306"/>
 		</transition>
 		<transition id="id25">
 			<source ref="id9"/>
 			<target ref="id6"/>
+			<label kind="guard" x="-739" y="-42">chosenTcpConnection &amp;&amp; fllowHttpStan &amp;&amp;  (reqType == 2040 || reqType == 2041)</label>
+			<label kind="synchronisation" x="-705" y="-195">noBody?</label>
+			<label kind="assignment" x="-782" y="-178">res = reqValidOrNot(reqType)</label>
 			<nail x="-671" y="-374"/>
 		</transition>
 		<transition id="id26">
 			<source ref="id9"/>
 			<target ref="id1"/>
+			<label kind="guard" x="-850" y="-459">!fllowHttpStan</label>
+			<label kind="synchronisation" x="-816" y="-433">error!</label>
 			<nail x="-680" y="-391"/>
 		</transition>
 		<transition id="id27">
 			<source ref="id10"/>
 			<target ref="id1"/>
+			<label kind="synchronisation" x="-790" y="-501">error?</label>
 		</transition>
 		<transition id="id28">
 			<source ref="id10"/>
 			<target ref="id9"/>
+			<label kind="select" x="-663" y="-459">vh : int [0,1]</label>
+			<label kind="guard" x="-663" y="-442">chosenTcpConnection</label>
+			<label kind="synchronisation" x="-688" y="-459">req?</label>
+			<label kind="assignment" x="-663" y="-425">fllowHttpStan = vh ,res = 0</label>
 		</transition>
 		<transition id="id29">
 			<source ref="id2"/>
 			<target ref="id10"/>
+			<label kind="select" x="-714" y="-561">i: int[0,1]</label>
+			<label kind="synchronisation" x="-731" y="-544">tecpEstablished!</label>
+			<label kind="assignment" x="-773" y="-629">chosenTcpConnection = tcpConnectionValid[i]</label>
 		</transition>
 		<transition id="id30">
 			<source ref="id3"/>
 			<target ref="id2"/>
+			<label kind="synchronisation" x="-816" y="-612">tcpSyn?</label>
 		</transition>
 	</template>
 	<template>
-		<name x="5" y="5">http_client</name>
+		<name x="5" y="5">Http_Client</name>
 		<declaration>// Place local declarations here.
+
+//reqs 
+const int reqList[8] = {2000,2001,2040,2041,3010,3011,4010,4011};
 </declaration>
 		<location id="id31" x="-493" y="-391">
 			<name x="-527" y="-450">CLOSED</name>
 		</location>
 		<location id="id32" x="-297" y="-391">
-			<name x="-382" y="-467">CONNECTION_REQUESTED</name>
+			<name x="-348" y="-450">TCP_CONNECTION</name>
 		</location>
 		<location id="id33" x="-297" y="-280">
-			<name x="-356" y="-331">NEED_REQUEST</name>
+			<name x="-280" y="-289">NEED_REQUEST</name>
 		</location>
 		<location id="id34" x="-297" y="-195">
-			<name x="-341" y="-238">REQUEST_SENT</name>
+			<name x="-425" y="-204">REQUEST_SENT</name>
+			<label kind="invariant" x="-467" y="-187">chosenTcpConnection</label>
 		</location>
 		<location id="id35" x="-493" y="-280">
 			<name x="-535" y="-322">ERROR_FAILURE</name>
@@ -160,17 +250,18 @@
 		<location id="id36" x="-459" y="-17">
 			<name x="-510" y="-68">BODY_REQUESTED</name>
 		</location>
-		<location id="id37" x="-68" y="-195">
-			<name x="-51" y="-204">Auth_ACCESS_OBTAINED</name>
+		<location id="id37" x="-17" y="-195">
+			<name x="0" y="-204">Auth_ACCESS_OBTAINED</name>
+			<label kind="invariant" x="9" y="-187">chosenTcpConnection</label>
 		</location>
 		<location id="id38" x="-459" y="136">
 			<name x="-486" y="102">DATA_VALID</name>
 		</location>
-		<location id="id39" x="-297" y="119">
-			<name x="-307" y="85">NO_DATA</name>
+		<location id="id39" x="-297" y="144">
+			<name x="-307" y="110">NO_DATA</name>
 		</location>
 		<location id="id40" x="-153" y="119">
-			<name x="-170" y="59">REDIRECTION</name>
+			<name x="-110" y="102">REDIRECTION</name>
 		</location>
 		<location id="id41" x="-297" y="255">
 		</location>
@@ -178,24 +269,33 @@
 		<transition id="id42">
 			<source ref="id37"/>
 			<target ref="id35"/>
-			<nail x="-68" y="-144"/>
-			<nail x="-493" y="-153"/>
+			<label kind="guard" x="-475" y="-165">res == 3</label>
+			<label kind="synchronisation" x="-475" y="-148">error?</label>
+			<nail x="-17" y="-178"/>
+			<nail x="-17" y="-127"/>
+			<nail x="-493" y="-136"/>
 		</transition>
 		<transition id="id43">
 			<source ref="id37"/>
 			<target ref="id32"/>
+			<label kind="guard" x="-170" y="-348">res != 3 &amp;&amp; res == 401</label>
+			<label kind="synchronisation" x="-127" y="-323">newReq?</label>
 		</transition>
 		<transition id="id44">
 			<source ref="id35"/>
 			<target ref="id32"/>
+			<label kind="synchronisation" x="-476" y="-348">newReq!</label>
 		</transition>
 		<transition id="id45">
 			<source ref="id35"/>
 			<target ref="id31"/>
+			<label kind="synchronisation" x="-586" y="-348">terminate!</label>
 		</transition>
 		<transition id="id46">
 			<source ref="id41"/>
 			<target ref="id31"/>
+			<label kind="guard" x="-755" y="306">res == 3</label>
+			<label kind="synchronisation" x="-755" y="323">error?</label>
 			<nail x="-297" y="340"/>
 			<nail x="-773" y="340"/>
 			<nail x="-782" y="-391"/>
@@ -203,6 +303,8 @@
 		<transition id="id47">
 			<source ref="id41"/>
 			<target ref="id32"/>
+			<label kind="guard" x="-279" y="310">res != 3 &amp;&amp; (res == 200 || res == 301 || res == 204)</label>
+			<label kind="synchronisation" x="-279" y="327">newReq?</label>
 			<nail x="-297" y="340"/>
 			<nail x="161" y="348"/>
 			<nail x="170" y="-391"/>
@@ -210,79 +312,107 @@
 		<transition id="id48">
 			<source ref="id38"/>
 			<target ref="id41"/>
+			<label kind="synchronisation" x="-441" y="238">resFin?</label>
 			<nail x="-459" y="255"/>
 		</transition>
 		<transition id="id49">
 			<source ref="id39"/>
 			<target ref="id41"/>
+			<label kind="synchronisation" x="-297" y="182">resFin?</label>
 		</transition>
 		<transition id="id50">
 			<source ref="id40"/>
 			<target ref="id41"/>
+			<label kind="synchronisation" x="-279" y="238">resFin?</label>
 			<nail x="-153" y="255"/>
 		</transition>
 		<transition id="id51">
 			<source ref="id36"/>
 			<target ref="id35"/>
+			<label kind="guard" x="-585" y="-51">!vbody</label>
+			<label kind="synchronisation" x="-585" y="-34">error?</label>
 			<nail x="-603" y="-17"/>
 			<nail x="-603" y="-280"/>
 		</transition>
 		<transition id="id52">
 			<source ref="id34"/>
 			<target ref="id40"/>
+			<label kind="guard" x="-212" y="-34">chosenTcpConnection &amp;&amp; fllowHttpStan &amp;&amp; (reqType == 3010 || reqType == 3011)</label>
+			<label kind="synchronisation" x="-161" y="0">red!</label>
 			<nail x="-297" y="-110"/>
 			<nail x="-153" y="-110"/>
 		</transition>
 		<transition id="id53">
 			<source ref="id34"/>
 			<target ref="id37"/>
+			<label kind="guard" x="-272" y="-170">chosenTcpConnection &amp;&amp; fllowHttpStan &amp;&amp;(reqType == 4010 || reqType == 4011)</label>
+			<label kind="synchronisation" x="-212" y="-195">auth!</label>
 		</transition>
 		<transition id="id54">
 			<source ref="id36"/>
 			<target ref="id38"/>
+			<label kind="guard" x="-450" y="25">vbody</label>
+			<label kind="synchronisation" x="-459" y="42">resBody?</label>
 		</transition>
 		<transition id="id55">
 			<source ref="id34"/>
 			<target ref="id36"/>
+			<label kind="guard" x="-629" y="-85">chosenTcpConnection &amp;&amp; fllowHttpStan &amp;&amp;  (reqType == 2000 || reqType == 2001)</label>
+			<label kind="synchronisation" x="-425" y="-127">body!</label>
 			<nail x="-297" y="-110"/>
 			<nail x="-459" y="-110"/>
 		</transition>
 		<transition id="id56">
 			<source ref="id34"/>
 			<target ref="id39"/>
+			<label kind="guard" x="-323" y="51">chosenTcpConnection &amp;&amp; fllowHttpStan &amp;&amp;  (reqType == 2040 || reqType == 2041)</label>
+			<label kind="synchronisation" x="-306" y="-17">noBody!</label>
 			<nail x="-297" y="-178"/>
 		</transition>
 		<transition id="id57">
 			<source ref="id34"/>
 			<target ref="id35"/>
+			<label kind="synchronisation" x="-450" y="-238">error?</label>
 			<nail x="-306" y="-195"/>
 		</transition>
 		<transition id="id58">
 			<source ref="id33"/>
 			<target ref="id35"/>
+			<label kind="guard" x="-476" y="-280">!chosenTcpConnection</label>
+			<label kind="synchronisation" x="-408" y="-314">error!</label>
 		</transition>
 		<transition id="id59">
 			<source ref="id33"/>
 			<target ref="id34"/>
+			<label kind="select" x="-263" y="-238">reqi : int[0,7]</label>
+			<label kind="guard" x="-272" y="-255">chosenTcpConnection</label>
+			<label kind="synchronisation" x="-306" y="-246">req!</label>
+			<label kind="assignment" x="-272" y="-221">reqType = reqList[reqi]</label>
 		</transition>
 		<transition id="id60">
 			<source ref="id32"/>
 			<target ref="id33"/>
+			<label kind="synchronisation" x="-357" y="-340">tecpEstablished?</label>
+			<label kind="assignment" x="-297" y="-323">reqType =0</label>
 		</transition>
 		<transition id="id61">
 			<source ref="id31"/>
 			<target ref="id32"/>
+			<label kind="synchronisation" x="-442" y="-416">tcpSyn!</label>
 		</transition>
 	</template>
 	<system>// Place template instantiations here.
-Process = Template();
+Client = Http_Client();
+Server = Http_Server();
 // List one or more processes to be composed into a system.
-system Process;
+system Client, Server;
 </system>
 	<queries>
 		<query>
-			<formula/>
+			<formula>A[] not deadlock</formula>
 			<comment/>
+			<result outcome="success" type="quality" timestamp="2025-11-24 11:41:20 +0100">
+			</result>
 		</query>
 	</queries>
 </nta>
