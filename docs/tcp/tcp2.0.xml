@@ -170,6 +170,7 @@ int ack = 0;
 int ack = 0;
 </declaration>
 		<location id="id19" x="-365" y="-59">
+			<name x="-375" y="-93">LISTEN</name>
 		</location>
 		<location id="id20" x="-170" y="-59">
 			<name x="-246" y="-136">SYN_CLIENT_RECEVED</name>
@@ -184,6 +185,7 @@ int ack = 0;
 			<name x="-10" y="136">CLIENT_ACK_REC_SUCC_SYN_ACK_SUCC</name>
 		</location>
 		<location id="id24" x="-246" y="17">
+			<name x="-229" y="-17">ACK_REFUSED</name>
 		</location>
 		<init ref="id19"/>
 		<transition id="id25">
@@ -302,7 +304,25 @@ system TcpClient , TcpServer;
 		<query>
 			<formula>A[] not deadlock</formula>
 			<comment/>
-			<result outcome="success" type="quality" timestamp="2025-11-29 16:37:43 +0100">
+			<result outcome="success" type="quality" timestamp="2025-12-02 15:33:34 +0100">
+			</result>
+		</query>
+		<query>
+			<formula>TcpServer.CLIENT_ACK_REC_SUCC_SYN_ACK_SUCC --&gt; TcpClient.ACK_SYN_SERVER_SUCC</formula>
+			<comment/>
+			<result outcome="success" type="quality" timestamp="2025-12-02 15:33:44 +0100">
+			</result>
+		</query>
+		<query>
+			<formula>TcpClient.CLOSED --&gt; TcpServer.LISTEN</formula>
+			<comment/>
+			<result outcome="success" type="quality" timestamp="2025-12-02 15:34:43 +0100">
+			</result>
+		</query>
+		<query>
+			<formula>TcpServer.CLIENT_ACK_REC_SUCC_SYN_ACK_SUCC --&gt; TcpClient.ack == TcpServer.seq+1 &amp;&amp; TcpServer.ack == TcpClient.seq+1</formula>
+			<comment/>
+			<result outcome="success" type="quality" timestamp="2025-12-02 15:31:21 +0100">
 			</result>
 		</query>
 	</queries>
