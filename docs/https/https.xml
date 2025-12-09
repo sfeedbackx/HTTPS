@@ -53,6 +53,33 @@ int[0, 2147483647] power(int base, int e) {
     return result;
 }
 int encrypt_fin;
+//===================================================
+/// HTTP
+//===================================================
+//channel
+chan tcpSyn;
+chan tcpTlsEstablished;
+chan req;
+chan body;
+chan red;
+chan noBody;
+chan auth;
+chan error;
+chan newReq;
+chan terminate;
+chan resBody;
+chan resFin;
+// tcp var
+const bool tcpConnectionValid[2] = {false, true};
+bool chosenTcpConnection ;
+int fllowHttpStan;
+int vbody;
+//request
+int reqType;
+
+// response
+int res;
+
 
 
 
@@ -72,7 +99,12 @@ int ack = 0;
 const int a = 5;
 int client_master_key;
 int decrypted_fin;
+//===================================================
+/// HTTP
+//===================================================
 
+//reqs 
+const int reqList[8] = {2000,2001,2040,2041,3010,3011,4010,4011};
 
 </declaration>
 		<location id="id0" x="-357" y="-42">
@@ -109,32 +141,56 @@ int decrypted_fin;
 			<name x="1487" y="-187">FIN_TLS_INTEGRITY</name>
 		</location>
 		<location id="id11" x="1606" y="-25">
-			<name x="1596" y="-59">TLS_DONE_FULL_ENCRYT_MSG</name>
+			<name x="1547" y="-68">TLS_DONE_FULL_ENCRYT_MSG</name>
 		</location>
 		<location id="id12" x="3034" y="-25">
+			<name x="3024" y="-59">RESPONSE_RECIVED</name>
 		</location>
 		<location id="id13" x="2822" y="127">
+			<name x="2812" y="93">REDIRECTION</name>
 		</location>
-		<location id="id14" x="2286" y="-25">
+		<location id="id14" x="2830" y="-153">
+			<name x="2820" y="-187">DATA_VALID</name>
 		</location>
-		<location id="id15" x="2830" y="-153">
+		<location id="id15" x="2822" y="-25">
+			<name x="2812" y="-59">NO_DATA</name>
 		</location>
-		<location id="id16" x="2822" y="-25">
+		<location id="id16" x="1972" y="-25">
+			<name x="1962" y="-59">NEED_REQUEST</name>
 		</location>
-		<location id="id17" x="1972" y="-25">
+		<location id="id17" x="2125" y="-25">
+			<name x="2115" y="-59">REQUEST_SENT</name>
 		</location>
-		<location id="id18" x="2125" y="-25">
+		<location id="id18" x="2465" y="-153">
+			<name x="2455" y="-187">BODY_REQUESTED</name>
 		</location>
-		<location id="id19" x="2465" y="-153">
+		<location id="id19" x="1802" y="-25">
+			<name x="1751" y="-76">TCP_AND_TLS_CONNECTION</name>
 		</location>
-		<location id="id20" x="1802" y="-25">
+		<location id="id20" x="1802" y="-195">
+			<name x="1792" y="-229">ERROR_FAILURE</name>
 		</location>
-		<location id="id21" x="1802" y="-195">
-		</location>
-		<location id="id22" x="2125" y="93">
+		<location id="id21" x="2125" y="93">
+			<name x="2115" y="59">Auth_ACCESS_OBTAINED</name>
 		</location>
 		<init ref="id0"/>
+		<transition id="id22">
+			<source ref="id17"/>
+			<target ref="id13"/>
+			<nail x="2414" y="-25"/>
+			<nail x="2422" y="127"/>
+		</transition>
 		<transition id="id23">
+			<source ref="id17"/>
+			<target ref="id18"/>
+			<nail x="2414" y="-25"/>
+			<nail x="2414" y="-153"/>
+		</transition>
+		<transition id="id24">
+			<source ref="id17"/>
+			<target ref="id15"/>
+		</transition>
+		<transition id="id25">
 			<source ref="id12"/>
 			<target ref="id0"/>
 			<nail x="3213" y="-25"/>
@@ -145,104 +201,87 @@ int decrypted_fin;
 			<nail x="-510" y="-272"/>
 			<nail x="-382" y="-42"/>
 		</transition>
-		<transition id="id24">
+		<transition id="id26">
 			<source ref="id12"/>
-			<target ref="id20"/>
+			<target ref="id19"/>
 			<nail x="3060" y="-8"/>
 			<nail x="3060" y="187"/>
 			<nail x="1768" y="170"/>
 			<nail x="1751" y="144"/>
 		</transition>
-		<transition id="id25">
+		<transition id="id27">
 			<source ref="id12"/>
-			<target ref="id21"/>
+			<target ref="id20"/>
 			<nail x="3060" y="-51"/>
 			<nail x="3043" y="-357"/>
 			<nail x="1836" y="-340"/>
 		</transition>
-		<transition id="id26">
-			<source ref="id22"/>
-			<target ref="id20"/>
+		<transition id="id28">
+			<source ref="id21"/>
+			<target ref="id19"/>
 			<nail x="1793" y="93"/>
 		</transition>
-		<transition id="id27">
-			<source ref="id22"/>
-			<target ref="id21"/>
+		<transition id="id29">
+			<source ref="id21"/>
+			<target ref="id20"/>
 			<nail x="2235" y="93"/>
 			<nail x="2227" y="-195"/>
 		</transition>
-		<transition id="id28">
-			<source ref="id19"/>
-			<target ref="id21"/>
+		<transition id="id30">
+			<source ref="id18"/>
+			<target ref="id20"/>
 			<nail x="2465" y="-280"/>
 			<nail x="1853" y="-280"/>
 		</transition>
-		<transition id="id29">
+		<transition id="id31">
 			<source ref="id13"/>
 			<target ref="id12"/>
 			<nail x="3034" y="127"/>
 		</transition>
-		<transition id="id30">
-			<source ref="id16"/>
-			<target ref="id12"/>
-		</transition>
-		<transition id="id31">
+		<transition id="id32">
 			<source ref="id15"/>
 			<target ref="id12"/>
-			<nail x="3043" y="-161"/>
-		</transition>
-		<transition id="id32">
-			<source ref="id19"/>
-			<target ref="id15"/>
 		</transition>
 		<transition id="id33">
 			<source ref="id14"/>
-			<target ref="id13"/>
-			<nail x="2286" y="119"/>
+			<target ref="id12"/>
+			<nail x="3043" y="-161"/>
 		</transition>
 		<transition id="id34">
-			<source ref="id14"/>
-			<target ref="id19"/>
-			<nail x="2286" y="-153"/>
-		</transition>
-		<transition id="id35">
-			<source ref="id14"/>
-			<target ref="id16"/>
-		</transition>
-		<transition id="id36">
 			<source ref="id18"/>
 			<target ref="id14"/>
 		</transition>
-		<transition id="id37">
-			<source ref="id18"/>
-			<target ref="id22"/>
-		</transition>
-		<transition id="id38">
-			<source ref="id21"/>
-			<target ref="id20"/>
-		</transition>
-		<transition id="id39">
+		<transition id="id35">
 			<source ref="id17"/>
 			<target ref="id21"/>
 		</transition>
-		<transition id="id40">
-			<source ref="id17"/>
-			<target ref="id18"/>
-		</transition>
-		<transition id="id41">
+		<transition id="id36">
 			<source ref="id20"/>
-			<target ref="id17"/>
+			<target ref="id19"/>
 		</transition>
-		<transition id="id42">
-			<source ref="id11"/>
+		<transition id="id37">
+			<source ref="id16"/>
 			<target ref="id20"/>
 		</transition>
-		<transition id="id43">
+		<transition id="id38">
+			<source ref="id16"/>
+			<target ref="id17"/>
+		</transition>
+		<transition id="id39">
+			<source ref="id19"/>
+			<target ref="id16"/>
+			<label kind="synchronisation" x="1820" y="-42">tcpTlsEstablished?</label>
+		</transition>
+		<transition id="id40">
+			<source ref="id11"/>
+			<target ref="id19"/>
+		</transition>
+		<transition id="id41">
 			<source ref="id3"/>
 			<target ref="id6"/>
 			<label kind="synchronisation" x="341" y="-55">startTls!</label>
 		</transition>
-		<transition id="id44">
+		<transition id="id42">
 			<source ref="id11"/>
 			<target ref="id6"/>
 			<nail x="1606" y="-272"/>
@@ -250,19 +289,19 @@ int decrypted_fin;
 			<nail x="714" y="-297"/>
 			<nail x="688" y="-280"/>
 		</transition>
-		<transition id="id45">
+		<transition id="id43">
 			<source ref="id11"/>
 			<target ref="id6"/>
 			<nail x="1462" y="204"/>
 			<nail x="654" y="204"/>
 		</transition>
-		<transition id="id46">
+		<transition id="id44">
 			<source ref="id10"/>
 			<target ref="id11"/>
-			<label kind="guard" x="1487" y="8">decrypted_fin == hash_fin</label>
+			<label kind="guard" x="1530" y="8">decrypted_fin == hash_fin</label>
 			<label kind="synchronisation" x="1488" y="-101">passed!</label>
 		</transition>
-		<transition id="id47">
+		<transition id="id45">
 			<source ref="id10"/>
 			<target ref="id6"/>
 			<label kind="guard" x="732" y="-221">!decrypted_fin == hash_fin</label>
@@ -271,47 +310,47 @@ int decrypted_fin;
 			<nail x="1436" y="-187"/>
 			<nail x="714" y="-187"/>
 		</transition>
-		<transition id="id48">
+		<transition id="id46">
 			<source ref="id9"/>
 			<target ref="id10"/>
 			<label kind="synchronisation" x="1344" y="-114">finTls?</label>
 			<label kind="assignment" x="1113" y="-153">decrypted_fin = encrypt_fin/client_master_key</label>
 			<nail x="1326" y="-51"/>
 		</transition>
-		<transition id="id49">
+		<transition id="id47">
 			<source ref="id8"/>
 			<target ref="id9"/>
 			<label kind="guard" x="1156" y="-25">valid_certificate</label>
-			<label kind="synchronisation" x="1164" y="-8">clientKeyExchange!</label>
-			<label kind="assignment" x="1165" y="-34">ag=power(g,a)%n,client_master_key=power(bg,a)%n</label>
+			<label kind="synchronisation" x="1164" y="34">clientKeyExchange!</label>
+			<label kind="assignment" x="1156" y="17">ag=power(g,a)%n,client_master_key=power(bg,a)%n</label>
 		</transition>
-		<transition id="id50">
+		<transition id="id48">
 			<source ref="id8"/>
 			<target ref="id6"/>
 			<label kind="guard" x="655" y="-68">!valid_certificate</label>
 			<label kind="synchronisation" x="697" y="-68">reject!</label>
 		</transition>
-		<transition id="id51">
+		<transition id="id49">
 			<source ref="id7"/>
 			<target ref="id8"/>
 			<label kind="synchronisation" x="841" y="17">serverHello?</label>
 			<nail x="714" y="42"/>
 			<nail x="1113" y="42"/>
 		</transition>
-		<transition id="id52">
+		<transition id="id50">
 			<source ref="id7"/>
 			<target ref="id6"/>
 			<label kind="synchronisation" x="667" y="-30">reject?</label>
 			<nail x="697" y="8"/>
 		</transition>
-		<transition id="id53">
+		<transition id="id51">
 			<source ref="id6"/>
 			<target ref="id7"/>
 			<label kind="synchronisation" x="527" y="-8">clientHello!</label>
 			<label kind="assignment" x="510" y="17">client_suite=5</label>
 			<nail x="629" y="0"/>
 		</transition>
-		<transition id="id54">
+		<transition id="id52">
 			<source ref="id1"/>
 			<target ref="id3"/>
 			<label kind="guard" x="170" y="-76">will_be_rec_succ_from_server</label>
@@ -319,14 +358,14 @@ int decrypted_fin;
 			<label kind="assignment" x="59" y="-42">ack = seq_need_to_be_ack+1</label>
 			<nail x="102" y="-42"/>
 		</transition>
-		<transition id="id55">
+		<transition id="id53">
 			<source ref="id1"/>
 			<target ref="id4"/>
 			<label kind="guard" x="136" y="-110">!will_be_rec_succ_from_server</label>
 			<label kind="synchronisation" x="136" y="-93">noack!</label>
 			<nail x="119" y="-68"/>
 		</transition>
-		<transition id="id56">
+		<transition id="id54">
 			<source ref="id4"/>
 			<target ref="id0"/>
 			<label kind="guard" x="-330" y="-157">retry_count&gt; RETRY_MAX_COUNT</label>
@@ -335,12 +374,12 @@ int decrypted_fin;
 			<nail x="-348" y="-119"/>
 			<nail x="-348" y="-68"/>
 		</transition>
-		<transition id="id57">
+		<transition id="id55">
 			<source ref="id4"/>
 			<target ref="id1"/>
 			<label kind="synchronisation" x="68" y="-110">syn?</label>
 		</transition>
-		<transition id="id58">
+		<transition id="id56">
 			<source ref="id4"/>
 			<target ref="id0"/>
 			<label kind="guard" x="-339" y="-208">retry_count&gt; RETRY_MAX_COUNT</label>
@@ -349,7 +388,7 @@ int decrypted_fin;
 			<nail x="136" y="-178"/>
 			<nail x="-357" y="-170"/>
 		</transition>
-		<transition id="id59">
+		<transition id="id57">
 			<source ref="id2"/>
 			<target ref="id0"/>
 			<label kind="guard" x="-484" y="-8">retry_count&gt; RETRY_MAX_COUNT</label>
@@ -360,7 +399,7 @@ int decrypted_fin;
 			<nail x="-314" y="-17"/>
 			<nail x="-340" y="-25"/>
 		</transition>
-		<transition id="id60">
+		<transition id="id58">
 			<source ref="id2"/>
 			<target ref="id0"/>
 			<label kind="guard" x="-501" y="68">retry_count&gt; RETRY_MAX_COUNT</label>
@@ -370,14 +409,14 @@ int decrypted_fin;
 			<nail x="-246" y="76"/>
 			<nail x="-331" y="17"/>
 		</transition>
-		<transition id="id61">
+		<transition id="id59">
 			<source ref="id5"/>
 			<target ref="id2"/>
 			<label kind="guard" x="-161" y="51">!will_be_rec_succ_from_client</label>
 			<label kind="synchronisation" x="-187" y="-17">noack?</label>
 			<nail x="-170" y="-25"/>
 		</transition>
-		<transition id="id62">
+		<transition id="id60">
 			<source ref="id5"/>
 			<target ref="id1"/>
 			<label kind="guard" x="-144" y="-68">will_be_rec_succ_from_client</label>
@@ -385,7 +424,7 @@ int decrypted_fin;
 			<nail x="-144" y="-68"/>
 			<nail x="51" y="-68"/>
 		</transition>
-		<transition id="id63">
+		<transition id="id61">
 			<source ref="id0"/>
 			<target ref="id5"/>
 			<label kind="select" x="-289" y="-110">i : int[0,1]</label>
@@ -393,7 +432,7 @@ int decrypted_fin;
 			<label kind="assignment" x="-858" y="-85">will_be_rec_succ_from_client=i,seq =1000 , ack=0,seq_need_to_be_ack=seq</label>
 			<nail x="-340" y="-42"/>
 		</transition>
-		<transition id="id64">
+		<transition id="id62">
 			<source ref="id3"/>
 			<target ref="id0"/>
 			<label kind="synchronisation" x="-279" y="212">fin!</label>
@@ -403,7 +442,7 @@ int decrypted_fin;
 			<nail x="-297" y="229"/>
 			<nail x="-365" y="170"/>
 		</transition>
-		<transition id="id65">
+		<transition id="id63">
 			<source ref="id3"/>
 			<target ref="id0"/>
 			<label kind="synchronisation" x="-288" y="-323">fin?</label>
@@ -415,7 +454,7 @@ int decrypted_fin;
 			<nail x="-374" y="-238"/>
 			<nail x="-374" y="-59"/>
 		</transition>
-		<transition id="id66">
+		<transition id="id64">
 			<source ref="id2"/>
 			<target ref="id5"/>
 			<label kind="select" x="-76" y="-8">i : int [ 0,1]</label>
@@ -456,102 +495,149 @@ const int b = 2;
 
 int server_master_key ;
 
-</declaration>
-		<location id="id67" x="-365" y="-59">
+//===================================================
+/// HTTP
+//===================================================
+//function to handle valid 
+int reqValidOrNot(int req){
+int valid = req%10;
+int res = req/10;
+if (valid){
+return res;
+}else{
+return 3;
+}
+
+}</declaration>
+		<location id="id65" x="-365" y="-59">
 			<name x="-375" y="-93">LISTEN</name>
 		</location>
-		<location id="id68" x="-170" y="-59">
+		<location id="id66" x="-170" y="-59">
 			<name x="-246" y="-136">SYN_CLIENT_RECEVED</name>
 		</location>
-		<location id="id69" x="255" y="-85">
+		<location id="id67" x="255" y="-85">
 			<name x="255" y="-76">CLIENT_ACK_REC_SUCC_SYN_ACK_SENT</name>
 		</location>
-		<location id="id70" x="348" y="-178">
+		<location id="id68" x="348" y="-178">
 			<name x="357" y="-212">CLIENT_ACK_REC_SUCC_SYN_ACK_RESENT</name>
 		</location>
-		<location id="id71" x="0" y="170">
+		<location id="id69" x="0" y="170">
 			<name x="-10" y="136">CLIENT_ACK_REC_SUCC_SYN_ACK_SUCC</name>
 		</location>
-		<location id="id72" x="-246" y="17">
+		<location id="id70" x="-246" y="17">
 			<name x="-229" y="-17">ACK_REFUSED</name>
 		</location>
-		<location id="id73" x="3221" y="178">
+		<location id="id71" x="3221" y="178">
+			<name x="3211" y="144">RESPONSE_SENT</name>
 		</location>
-		<location id="id74" x="1989" y="178">
+		<location id="id72" x="1989" y="178">
+			<name x="1955" y="110">TCP_AND_TLS_CONNECTION</name>
 		</location>
-		<location id="id75" x="1989" y="8">
+		<location id="id73" x="1989" y="8">
+			<name x="1979" y="-26">ERROR_FAILURE</name>
 		</location>
-		<location id="id76" x="2312" y="296">
+		<location id="id74" x="2312" y="296">
+			<name x="2302" y="262">Auth_ACCESS_GIVEN</name>
 		</location>
-		<location id="id77" x="2652" y="50">
+		<location id="id75" x="2652" y="50">
+			<name x="2642" y="16">BODY_RECIVED</name>
 		</location>
-		<location id="id78" x="3009" y="330">
+		<location id="id76" x="3009" y="330">
+			<name x="2999" y="296">REDIRECTION</name>
 		</location>
-		<location id="id79" x="3009" y="178">
+		<location id="id77" x="3009" y="178">
+			<name x="2999" y="144">NO_DATA</name>
 		</location>
-		<location id="id80" x="3017" y="50">
+		<location id="id78" x="3017" y="50">
+			<name x="3007" y="16">DATA_VALID</name>
 		</location>
-		<location id="id81" x="2473" y="178">
+		<location id="id79" x="2312" y="178">
+			<name x="2302" y="144">REQUEST_RECIVED</name>
 		</location>
-		<location id="id82" x="2312" y="178">
+		<location id="id80" x="2159" y="178">
+			<name x="2149" y="144">LISNING_REQUEST</name>
 		</location>
-		<location id="id83" x="2159" y="178">
-		</location>
-		<location id="id84" x="1793" y="178">
+		<location id="id81" x="1793" y="178">
 			<name x="1783" y="144">TLS_DONE_FULL_ENCRYT_MSG</name>
 		</location>
-		<location id="id85" x="824" y="169">
+		<location id="id82" x="824" y="169">
 			<name x="739" y="127">TLS_FLOW</name>
 		</location>
-		<location id="id86" x="1657" y="59">
+		<location id="id83" x="1657" y="59">
 			<name x="1674" y="16">FIN_TLS_INTEGRITY</name>
 		</location>
-		<location id="id87" x="1496" y="169">
+		<location id="id84" x="1496" y="169">
 			<name x="1486" y="135">CLIENT_KEY_CHANGE_RECIVED</name>
 		</location>
-		<location id="id88" x="1334" y="169">
+		<location id="id85" x="1334" y="169">
 			<name x="1258" y="127">SERVER_HELLO_SENT</name>
 		</location>
-		<location id="id89" x="875" y="237">
+		<location id="id86" x="875" y="237">
 			<name x="865" y="203">CLIENT_HELLO_RECIVED</name>
 		</location>
-		<init ref="id67"/>
+		<init ref="id65"/>
+		<transition id="id87">
+			<source ref="id79"/>
+			<target ref="id76"/>
+			<label kind="guard" x="2330" y="144">chosenTcpConnection &amp;&amp; fllowHttpStan &amp;&amp; (reqType == 3010 || reqType == 3011)</label>
+			<label kind="synchronisation" x="2330" y="161">red?</label>
+			<label kind="assignment" x="2330" y="178">res = reqValidOrNot(reqType)</label>
+			<nail x="2592" y="178"/>
+			<nail x="2592" y="331"/>
+		</transition>
+		<transition id="id88">
+			<source ref="id79"/>
+			<target ref="id75"/>
+			<label kind="select" x="2330" y="127">bv : int[0,1]</label>
+			<label kind="guard" x="2330" y="144">fllowHttpStan &amp;&amp;  (reqType == 2000 || reqType == 2001)</label>
+			<label kind="synchronisation" x="2330" y="161">body?</label>
+			<label kind="assignment" x="2330" y="178">vbody = bv</label>
+			<nail x="2592" y="178"/>
+			<nail x="2592" y="51"/>
+		</transition>
+		<transition id="id89">
+			<source ref="id79"/>
+			<target ref="id77"/>
+			<label kind="guard" x="2330" y="144">chosenTcpConnection &amp;&amp; fllowHttpStan &amp;&amp;  (reqType == 2040 || reqType == 2041)</label>
+			<label kind="synchronisation" x="2330" y="161">noBody?</label>
+			<label kind="assignment" x="2330" y="178">res = reqValidOrNot(reqType)</label>
+		</transition>
 		<transition id="id90">
-			<source ref="id71"/>
-			<target ref="id85"/>
+			<source ref="id69"/>
+			<target ref="id82"/>
 			<label kind="synchronisation" x="18" y="152">startTls?</label>
 		</transition>
 		<transition id="id91">
-			<source ref="id72"/>
-			<target ref="id67"/>
+			<source ref="id70"/>
+			<target ref="id65"/>
 			<label kind="guard" x="-314" y="-34">retry_count&gt; RETRY_MAX_COUNT</label>
 			<label kind="synchronisation" x="-297" y="-17">rest!</label>
 			<nail x="-263" y="-25"/>
 		</transition>
 		<transition id="id92">
-			<source ref="id72"/>
-			<target ref="id67"/>
+			<source ref="id70"/>
+			<target ref="id65"/>
 			<label kind="guard" x="-374" y="34">retry_count&gt; RETRY_MAX_COUNT</label>
 			<label kind="synchronisation" x="-348" y="8">rest?</label>
 			<nail x="-289" y="17"/>
 		</transition>
 		<transition id="id93">
-			<source ref="id68"/>
-			<target ref="id72"/>
+			<source ref="id66"/>
+			<target ref="id70"/>
 			<label kind="guard" x="-221" y="8">!will_be_rec_succ_from_client</label>
 			<label kind="synchronisation" x="-136" y="-8">noack!</label>
 			<nail x="-153" y="-34"/>
 			<nail x="-195" y="8"/>
 		</transition>
 		<transition id="id94">
-			<source ref="id72"/>
-			<target ref="id68"/>
+			<source ref="id70"/>
+			<target ref="id66"/>
 			<label kind="synchronisation" x="-221" y="-51">syn?</label>
 			<nail x="-221" y="-25"/>
 		</transition>
 		<transition id="id95">
-			<source ref="id71"/>
-			<target ref="id67"/>
+			<source ref="id69"/>
+			<target ref="id65"/>
 			<label kind="synchronisation" x="-373" y="76">fin?</label>
 			<label kind="assignment" x="-373" y="93">ack =0, seq=0</label>
 			<nail x="-59" y="93"/>
@@ -559,8 +645,8 @@ int server_master_key ;
 			<nail x="-399" y="-34"/>
 		</transition>
 		<transition id="id96">
-			<source ref="id71"/>
-			<target ref="id67"/>
+			<source ref="id69"/>
+			<target ref="id65"/>
 			<label kind="synchronisation" x="-398" y="153">fin!</label>
 			<label kind="assignment" x="-398" y="170">ack =0, seq=0</label>
 			<nail x="-416" y="170"/>
@@ -568,14 +654,14 @@ int server_master_key ;
 			<nail x="-382" y="-59"/>
 		</transition>
 		<transition id="id97">
-			<source ref="id69"/>
-			<target ref="id71"/>
+			<source ref="id67"/>
+			<target ref="id69"/>
 			<label kind="guard" x="59" y="51">will_be_rec_succ_from_server</label>
 			<label kind="synchronisation" x="42" y="17">ackn?</label>
 		</transition>
 		<transition id="id98">
-			<source ref="id70"/>
-			<target ref="id67"/>
+			<source ref="id68"/>
+			<target ref="id65"/>
 			<label kind="guard" x="-407" y="-327">retry_count&gt; RETRY_MAX_COUNT</label>
 			<label kind="synchronisation" x="-407" y="-310">rest?</label>
 			<label kind="assignment" x="-407" y="-293">ack =0, seq=0</label>
@@ -584,8 +670,8 @@ int server_master_key ;
 			<nail x="-425" y="-93"/>
 		</transition>
 		<transition id="id99">
-			<source ref="id70"/>
-			<target ref="id67"/>
+			<source ref="id68"/>
+			<target ref="id65"/>
 			<label kind="guard" x="-136" y="-280">retry_count&gt; RETRY_MAX_COUNT</label>
 			<label kind="synchronisation" x="-25" y="-238">rest!</label>
 			<label kind="assignment" x="264" y="-221">ack =0, seq=0</label>
@@ -595,8 +681,8 @@ int server_master_key ;
 			<nail x="-374" y="-93"/>
 		</transition>
 		<transition id="id100">
-			<source ref="id70"/>
-			<target ref="id69"/>
+			<source ref="id68"/>
+			<target ref="id67"/>
 			<label kind="select" x="365" y="-161">j : int[0,1]</label>
 			<label kind="guard" x="348" y="-144">retry_count&lt;= RETRY_MAX_COUNT</label>
 			<label kind="synchronisation" x="306" y="-110">syn!</label>
@@ -604,16 +690,16 @@ int server_master_key ;
 			<nail x="348" y="-144"/>
 		</transition>
 		<transition id="id101">
-			<source ref="id69"/>
-			<target ref="id70"/>
+			<source ref="id67"/>
+			<target ref="id68"/>
 			<label kind="guard" x="59" y="-178">!will_be_rec_succ_from_server</label>
 			<label kind="synchronisation" x="238" y="-161">noack?</label>
 			<nail x="263" y="-119"/>
 			<nail x="314" y="-178"/>
 		</transition>
 		<transition id="id102">
-			<source ref="id68"/>
-			<target ref="id69"/>
+			<source ref="id66"/>
+			<target ref="id67"/>
 			<label kind="select" x="93" y="-119">j : int[0,1]</label>
 			<label kind="guard" x="-136" y="-110">will_be_rec_succ_from_client</label>
 			<label kind="synchronisation" x="187" y="-110">synack!</label>
@@ -621,168 +707,174 @@ int server_master_key ;
 			<nail x="-153" y="-85"/>
 		</transition>
 		<transition id="id103">
-			<source ref="id67"/>
-			<target ref="id68"/>
+			<source ref="id65"/>
+			<target ref="id66"/>
 			<label kind="synchronisation" x="-289" y="-85">syn?</label>
 			<label kind="assignment" x="-347" y="-59">ack =0 ,seq=0</label>
 		</transition>
 		<transition id="id104">
-			<source ref="id73"/>
-			<target ref="id74"/>
+			<source ref="id71"/>
+			<target ref="id72"/>
+			<label kind="guard" x="1973" y="347">res != 3 &amp;&amp; (res == 200 || res == 301 || res == 204)</label>
+			<label kind="synchronisation" x="1973" y="364">newReq!</label>
 			<nail x="3247" y="195"/>
 			<nail x="3247" y="390"/>
 			<nail x="1955" y="373"/>
 			<nail x="1938" y="347"/>
 		</transition>
 		<transition id="id105">
-			<source ref="id73"/>
-			<target ref="id75"/>
+			<source ref="id71"/>
+			<target ref="id73"/>
+			<label kind="guard" x="2041" y="-179">res == 3</label>
+			<label kind="synchronisation" x="2041" y="-162">error!</label>
 			<nail x="3247" y="152"/>
 			<nail x="3230" y="-154"/>
 			<nail x="2023" y="-137"/>
 		</transition>
 		<transition id="id106">
-			<source ref="id76"/>
-			<target ref="id74"/>
+			<source ref="id74"/>
+			<target ref="id72"/>
+			<label kind="guard" x="1998" y="262">res != 3 &amp;&amp; res == 401</label>
+			<label kind="synchronisation" x="1998" y="279">newReq!</label>
 			<nail x="1980" y="296"/>
 		</transition>
 		<transition id="id107">
-			<source ref="id76"/>
-			<target ref="id75"/>
+			<source ref="id74"/>
+			<target ref="id73"/>
+			<label kind="guard" x="2330" y="262">res == 3</label>
+			<label kind="synchronisation" x="2330" y="279">error!</label>
 			<nail x="2422" y="296"/>
 			<nail x="2414" y="8"/>
 		</transition>
 		<transition id="id108">
-			<source ref="id77"/>
-			<target ref="id75"/>
+			<source ref="id75"/>
+			<target ref="id73"/>
+			<label kind="guard" x="2193" y="-102">!vbody</label>
+			<label kind="synchronisation" x="2091" y="-102">error!</label>
 			<nail x="2652" y="-77"/>
 			<nail x="2040" y="-77"/>
 		</transition>
 		<transition id="id109">
-			<source ref="id78"/>
-			<target ref="id73"/>
+			<source ref="id76"/>
+			<target ref="id71"/>
+			<label kind="synchronisation" x="3027" y="313">resFin!</label>
 			<nail x="3221" y="330"/>
 		</transition>
 		<transition id="id110">
-			<source ref="id79"/>
-			<target ref="id73"/>
+			<source ref="id77"/>
+			<target ref="id71"/>
+			<label kind="synchronisation" x="3027" y="161">resFin!</label>
 		</transition>
 		<transition id="id111">
-			<source ref="id80"/>
-			<target ref="id73"/>
+			<source ref="id78"/>
+			<target ref="id71"/>
+			<label kind="synchronisation" x="3035" y="29">resFin!</label>
 			<nail x="3230" y="42"/>
 		</transition>
 		<transition id="id112">
-			<source ref="id77"/>
-			<target ref="id80"/>
+			<source ref="id75"/>
+			<target ref="id78"/>
+			<label kind="guard" x="2670" y="16">vbody</label>
+			<label kind="synchronisation" x="2670" y="33">resBody!</label>
+			<label kind="assignment" x="2670" y="50">res = reqValidOrNot(reqType)</label>
 		</transition>
 		<transition id="id113">
-			<source ref="id81"/>
-			<target ref="id78"/>
-			<nail x="2473" y="322"/>
+			<source ref="id79"/>
+			<target ref="id74"/>
+			<label kind="guard" x="2312" y="203">fllowHttpStan &amp;&amp;(reqType == 4010 || reqType == 4011)</label>
+			<label kind="synchronisation" x="2312" y="220">auth?</label>
+			<label kind="assignment" x="2312" y="237">res = reqValidOrNot(reqType)</label>
 		</transition>
 		<transition id="id114">
-			<source ref="id81"/>
-			<target ref="id77"/>
-			<nail x="2473" y="50"/>
+			<source ref="id73"/>
+			<target ref="id72"/>
 		</transition>
 		<transition id="id115">
-			<source ref="id81"/>
-			<target ref="id79"/>
+			<source ref="id80"/>
+			<target ref="id73"/>
+			<label kind="synchronisation" x="2007" y="76">error?</label>
 		</transition>
 		<transition id="id116">
-			<source ref="id82"/>
-			<target ref="id81"/>
+			<source ref="id80"/>
+			<target ref="id79"/>
+			<label kind="select" x="2176" y="161">vh : int [0,1]</label>
+			<label kind="synchronisation" x="2201" y="178">req?</label>
+			<label kind="assignment" x="2074" y="212">fllowHttpStan = vh ,res = 0</label>
 		</transition>
 		<transition id="id117">
-			<source ref="id82"/>
-			<target ref="id76"/>
+			<source ref="id72"/>
+			<target ref="id80"/>
+			<label kind="synchronisation" x="1997" y="153">tcpTlsEstablished!</label>
 		</transition>
 		<transition id="id118">
-			<source ref="id75"/>
-			<target ref="id74"/>
+			<source ref="id81"/>
+			<target ref="id72"/>
 		</transition>
 		<transition id="id119">
-			<source ref="id83"/>
-			<target ref="id75"/>
-		</transition>
-		<transition id="id120">
-			<source ref="id83"/>
+			<source ref="id81"/>
 			<target ref="id82"/>
-		</transition>
-		<transition id="id121">
-			<source ref="id74"/>
-			<target ref="id83"/>
-		</transition>
-		<transition id="id122">
-			<source ref="id84"/>
-			<target ref="id74"/>
-		</transition>
-		<transition id="id123">
-			<source ref="id84"/>
-			<target ref="id85"/>
 			<nail x="1793" y="-69"/>
 			<nail x="1776" y="-94"/>
 			<nail x="901" y="-94"/>
 			<nail x="875" y="-77"/>
 		</transition>
-		<transition id="id124">
-			<source ref="id84"/>
-			<target ref="id85"/>
+		<transition id="id120">
+			<source ref="id81"/>
+			<target ref="id82"/>
 			<nail x="1649" y="407"/>
 			<nail x="841" y="407"/>
 		</transition>
-		<transition id="id125">
-			<source ref="id86"/>
-			<target ref="id84"/>
+		<transition id="id121">
+			<source ref="id83"/>
+			<target ref="id81"/>
 			<label kind="synchronisation" x="1675" y="101">passed?</label>
 		</transition>
-		<transition id="id126">
-			<source ref="id86"/>
-			<target ref="id85"/>
+		<transition id="id122">
+			<source ref="id83"/>
+			<target ref="id82"/>
 			<nail x="1657" y="50"/>
 			<nail x="1623" y="16"/>
 			<nail x="901" y="16"/>
 		</transition>
-		<transition id="id127">
-			<source ref="id87"/>
-			<target ref="id86"/>
+		<transition id="id123">
+			<source ref="id84"/>
+			<target ref="id83"/>
 			<label kind="synchronisation" x="1531" y="88">finTls!</label>
 			<label kind="assignment" x="1326" y="51">encrypt_fin=hash_fin*server_master_key</label>
 			<nail x="1513" y="152"/>
 		</transition>
-		<transition id="id128">
-			<source ref="id88"/>
-			<target ref="id87"/>
+		<transition id="id124">
+			<source ref="id85"/>
+			<target ref="id84"/>
 			<label kind="guard" x="1360" y="204">valid_certificate</label>
 			<label kind="synchronisation" x="1343" y="221">clientKeyExchange?</label>
 			<label kind="assignment" x="1351" y="187">server_master_key=power(ag,b)%50</label>
 		</transition>
-		<transition id="id129">
-			<source ref="id88"/>
-			<target ref="id85"/>
+		<transition id="id125">
+			<source ref="id85"/>
+			<target ref="id82"/>
 			<label kind="guard" x="842" y="135">!valid_certificate</label>
 			<label kind="synchronisation" x="842" y="152">reject!</label>
 		</transition>
-		<transition id="id130">
-			<source ref="id89"/>
-			<target ref="id88"/>
+		<transition id="id126">
+			<source ref="id86"/>
+			<target ref="id85"/>
 			<label kind="guard" x="1071" y="255">is_suite_supported(client_suite)</label>
 			<label kind="synchronisation" x="919" y="228">serverHello!</label>
 			<label kind="assignment" x="919" y="245">bg=power(g,b)%n</label>
 			<nail x="901" y="245"/>
 			<nail x="1300" y="245"/>
 		</transition>
-		<transition id="id131">
-			<source ref="id89"/>
-			<target ref="id85"/>
+		<transition id="id127">
+			<source ref="id86"/>
+			<target ref="id82"/>
 			<label kind="guard" x="867" y="187">!is_suite_supported(client_suite)</label>
 			<label kind="synchronisation" x="854" y="173">reject!</label>
 			<nail x="884" y="211"/>
 		</transition>
-		<transition id="id132">
-			<source ref="id85"/>
-			<target ref="id89"/>
+		<transition id="id128">
+			<source ref="id82"/>
+			<target ref="id86"/>
 			<label kind="synchronisation" x="663" y="212">clientHello?</label>
 			<nail x="816" y="203"/>
 		</transition>
