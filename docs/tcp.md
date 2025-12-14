@@ -1,16 +1,16 @@
 # TCP
 
-## Table content
+## Table of Contents
 
-1. what is ``TCP``
-2. ``TCP`` packet 
+1. What is `TCP`
+2. `TCP` packet
 3. Acknowledgment and Sequence Number
-4. 3 Way handshake and sending data
-5. Automata Flow for ``TCP``
+4. 3-Way Handshake and Sending Data
+5. Automata Flow for `TCP`
 
 ## 1. What is TCP
 
-To understand ``TCP`` we need to see what is the problem that it's solve 
+To understand `TCP`, we need to see what problem it solves. 
 
 When two devices communicate over a network—like your computer loading a webpage from a
 server—the data must travel reliably across potentially unreliable links. Networks can lose
@@ -18,22 +18,22 @@ packets, deliver them out of order, or even duplicate them. Without a way to han
 applications would receive incomplete, jumbled, or missing data, making things like web browsing,
 email, or file transfers unreliable or impossible.
 
-Transmission Control Protocol ``(TCP)`` was designed to solve this problem. It provides a
+Transmission Control Protocol (`TCP`) was designed to solve this problem. It provides a
 reliable, ordered, and error-checked delivery of data between applications running on hosts
 communicating over an IP network.
 
-``TCP`` ensures reliability by:
+`TCP` ensures reliability by:
 
-    - Acknowledging received data (so the sender knows it arrived),
-    - Retransmitting lost packets,
-    - Putting data back in the correct order if packets arrive out of sequence,
-    - Controlling the flow of data to avoid overwhelming the receiver,
-    - Checking for errors using checksums.
+- Acknowledging received data (so the sender knows it arrived)
+- Retransmitting lost packets
+- Putting data back in the correct order if packets arrive out of sequence
+- Controlling the flow of data to avoid overwhelming the receiver
+- Checking for errors using checksums
 
-In short, ``TCP`` turns an unreliable network into a dependable communication channel for
-applications that can’t afford to lose or disorder data.
+In short, `TCP` turns an unreliable network into a dependable communication channel for
+applications that can't afford to lose or disorder data.
 
-## 2. TCP packet 
+## 2. TCP Packet 
 
 ```bash
 
@@ -79,33 +79,36 @@ applications that can’t afford to lose or disorder data.
 |       FRAME         |       IP HEADER      |       TCP HEADER     |        DATA          |       TRAILER        |
 +---------------------+----------------------+----------------------+----------------------+----------------------+
 ```
-this show how the data is warped
+
+This shows how the data is wrapped.
 ## 3. Acknowledgment and Sequence Number
 
 ### Acknowledgment Number (ACK)
-The ``acknowledgment number`` is used by the ``receiver`` to tell the ``sender`` which bytes have been
-successfully received. It indicates the next expected sequence number—meaning 
->“I’ve received everything up to this point; send me data starting here.”
+
+The `acknowledgment number` is used by the `receiver` to tell the `sender` which bytes have been
+successfully received. It indicates the next expected sequence number—meaning
+> "I've received everything up to this point; send me data starting here."
 
 ACK numbers are only valid when the ACK flag in the TCP header is set (which is almost always
 after the connection is established).
-***Example:***
-If a receiver gets bytes 5000–5999, it sends back an ACK with number 6000, meaning “I’m ready for
-byte 6000 onward.”
+
+**Example:**
+If a receiver gets bytes 5000–5999, it sends back an ACK with number 6000, meaning "I'm ready for
+byte 6000 onward."
 
 ### Sequence Number
 
-Every byte of data transmitted in a ``TCP`` connection is assigned a sequence number.
-The sequence number in a ``TCP`` segment indicates the position of the first byte of that segment in
-the overall data stream. This allows the ``receiver`` to reassemble segments in the correct order,
-even if they arrive out of sequence. The initial ``sequence number`` (ISN) is randomly chosen at the
-start of a connection ``(during the 3-way handshake)`` for security and uniqueness.
+Every byte of data transmitted in a `TCP` connection is assigned a sequence number.
+The sequence number in a `TCP` segment indicates the position of the first byte of that segment in
+the overall data stream. This allows the `receiver` to reassemble segments in the correct order,
+even if they arrive out of sequence. The initial `sequence number` (ISN) is randomly chosen at the
+start of a connection (during the 3-way handshake) for security and uniqueness.
 
-***Example:***
+**Example:**
 If a sender transmits 1000 bytes starting at sequence number 5000, those bytes are numbered 5000
 to 5999. The next segment will start with sequence number 6000.
 
-## 4. 3 Way handshake and sending data
+## 4. 3-Way Handshake and Sending Data
 
 The 3-way handshake is the process TCP uses to establish a reliable connection between two devices (usually called the client and the server) before any data is exchanged.
 
@@ -115,24 +118,29 @@ It involves three steps, each exchanging special TCP segments with specific cont
 - The client wants to start a connection, so it sends a TCP segment with:
     - The SYN flag = 1
     - An initial sequence number (ISN) chosen randomly (e.g., Seq = 1000)
-- This says: “Hi, I’d like to connect. My starting sequence number is 1000.”
+- This says: "Hi, I'd like to connect. My starting sequence number is 1000."
+
 ### Step 2: SYN-ACK (Synchronize-Acknowledge)
 - The server responds with a segment that has:
     - SYN = 1 (to synchronize its own sequence number)
-    - ACK = 1 (to acknowledge the client’s SYN)
+    - ACK = 1 (to acknowledge the client's SYN)
     - Its own initial sequence number (e.g., Seq = 3000)
-    - An acknowledgment number = client’s ISN + 1 (e.g., Ack = 1001)
-- This means: “I agree to connect. My starting number is 3000, and I expect your next byte to be 1001.”
+    - An acknowledgment number = client's ISN + 1 (e.g., Ack = 1001)
+- This means: "I agree to connect. My starting number is 3000, and I expect your next byte to be 1001."
+
 ### Step 3: ACK (Acknowledge)
 - The client sends a final segment with:
     - ACK = 1
-    -Acknowledgment number = server’s ISN + 1 (e.g., Ack = 3001)
-    -(Sequence number is now 1001, continuing from its first segment)
-- This confirms: “Got it! I’m ready to send/receive data starting from your byte 3001.”
+    - Acknowledgment number = server's ISN + 1 (e.g., Ack = 3001)
+    - (Sequence number is now 1001, continuing from its first segment)
+- This confirms: "Got it! I'm ready to send/receive data starting from your byte 3001."
+
 After these three steps, the connection is fully established.
 Both sides now know:
-- Each other’s initial sequence numbers, That the other is ready to communicate, And how to
-correctly number and acknowledge future data.
+- Each other's initial sequence numbers
+- That the other is ready to communicate
+- How to correctly number and acknowledge future data
+
 Only after the 3-way handshake does actual data transfer begin.
 ### Sequence Diagram
 
@@ -158,5 +166,5 @@ Client (192.168.3.8:1600)             Server (192.168.3.5:5600)
 ```
 ## 5. Automata Flow for TCP
 
-![3 Way Handshake Automata](./3_way_hand_auto.png)
+![3-Way Handshake Automata](./assets/3_way_hand_auto.png)
 

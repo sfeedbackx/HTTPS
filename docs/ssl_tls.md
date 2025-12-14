@@ -1,17 +1,17 @@
 # SSL/TLS
 
-## Table content
+## Table of Contents
 
-1. Problem the data exchange faced
-2. What is ``SSL`` And what ``TLS``
+1. Problems the data exchange faced
+2. What is `SSL` and what is `TLS`
 3. What is Hashing and Cryptography
-4. ``SSL\TLS`` flow 2 Round and 1 Round
-5. Automata Flow for ``TLS``
+4. `SSL/TLS` flow: 2 Round Trips and 1 Round Trip
+5. Automata Flow for `TLS`
 
 
-## 1. Problem the data exchange faced
+## 1. Problems the data exchange faced
 
-When applications communicate over the internet using protocols like ``HTTP`` or plain ``TCP``, the data
+When applications communicate over the internet using protocols like `HTTP` or plain `TCP`, the data
 is sent in cleartext (unencrypted). This creates several serious problems:
 
 1. Eavesdropping (Confidentiality Loss)
@@ -26,19 +26,22 @@ is sent in cleartext (unencrypted). This creates several serious problems:
 4. Replay Attacks
     - An attacker records a valid data exchange (e.g., “Transfer $100”) and replays it later to repeat the action.
 
-## 2. What is SSL And what TLS
+## 2. What is SSL and what is TLS
 
 ### SSL (Secure Sockets Layer)
 
 - Developed by Netscape in the 1990s to secure web communications.
 - Versions: SSL 2.0 (1995), SSL 3.0 (1996).
->All SSL versions are now obsolete and insecure (vulnerable to attacks like POODLE).
+
+> All SSL versions are now obsolete and insecure (vulnerable to attacks like POODLE).
 
 ### TLS (Transport Layer Security)
+
 - Successor to SSL, standardized by the IETF.
 - First version: TLS 1.0 (1999), followed by TLS 1.1, TLS 1.2 (widely used), and TLS 1.3 (modern,
 fast, and secure).
->TLS is the global standard for securing internet communications (e.g., HTTPS, email, APIs).
+
+> TLS is the global standard for securing internet communications (e.g., HTTPS, email, APIs).
 
 ### Where Does TLS Operate?
 TLS sits between the Application Layer and the Transport Layer (TCP) in the network stack:
@@ -56,31 +59,33 @@ TLS sits between the Application Layer and the Transport Layer (TCP) in the netw
 - TLS encrypts it and passes the ciphertext to TCP.
 - TCP handles reliable delivery over the network via IP.
 
-###  Why Not Encrypt at the IP Layer (e.g., IPsec)?
-Encrypting at the network layer (like IPsec) is possible, but it’s not ideal for most internet applications:
+### Why Not Encrypt at the IP Layer (e.g., IPsec)?
 
-- ``Too broad`` : IPsec secures all traffic between two machines — but often you only want to protect
-one service(e.g., a login page).
-- ``NAT/Firewall problems`` : Many networks use NAT or deep packet inspection; IPsec can break or
+Encrypting at the network layer (like IPsec) is possible, but it's not ideal for most internet applications:
+
+- **Too broad**: IPsec secures all traffic between two machines — but often you only want to protect
+one service (e.g., a login page).
+- **NAT/Firewall problems**: Many networks use NAT or deep packet inspection; IPsec can break or
 be blocked.
-- ``No application control`` : Developers can’t easily enable/disable it per feature — it’s
+- **No application control**: Developers can't easily enable/disable it per feature — it's
 managed at the OS/network level.
 
 ### Why Not Encrypt Directly in the Application?
+
 You could manually encrypt data inside your code — but this is dangerous and inefficient:
 
-- ``Hard to get right``: Crypto is subtle: mistakes in key exchange, padding, or nonce reuse
+- **Hard to get right**: Crypto is subtle: mistakes in key exchange, padding, or nonce reuse
 break security.
-- ``No standardization`` : Every app would invent its own method → harder to audit, update, or
+- **No standardization**: Every app would invent its own method → harder to audit, update, or
 interoperate.
 
-### Cryptography and Hashing 
+## 3. What is Hashing and Cryptography
 
-#### Cryptography 
+### Cryptography
 
-So Cryptography  is not a new thing it has been used by old civilization  (old Egypt Kingdom).
+Cryptography is not a new thing; it has been used by old civilizations (e.g., the ancient Egyptian Kingdom).
 
-This not a history lesson so in short Cryptography has two operation:
+This is not a history lesson, so in short, cryptography has two operations:
 
 - **Encryption** is the process of converting plain text into an unreadable format by
 applying specific operations or algorithms. The result of this process is called cipher text,
@@ -102,14 +107,15 @@ Asymmetric encryption uses a pair of keys: a public key for encryption and a pri
 decryption. This method is often used for secure key exchanges and digital signatures.
     - Examples of Algorithms: RSA (Rivest-Shamir-Adleman): A widely used asymmetric encryption
     algorithm that relies on the difficulty of factorizing large prime numbers.
-#### Hashing
+
+### Hashing
 
 Hashing is the process of converting data into a fixed-size string of characters, which typically
 appears random. This outcome, known as a hash value or hash code, uniquely represents the
 original data. Hashing is crucial in various applications, particularly in data integrity,
 security, and authentication.
 
-##### Key Features of Hashing
+#### Key Features of Hashing
 1. **One-Way Function:**
 Hashing is a one-way function, meaning it is practically impossible to revert the hash back to
 the original data. This property makes hashing ideal for storing passwords securely.
@@ -126,7 +132,7 @@ data integrity.
 A good hashing algorithm makes it difficult to find two different inputs that produce the same
 hash value. This property is essential for ensuring data uniqueness.
 
-### 4. SSL\TLS flow 2 Round and 1 Round
+## 4. SSL/TLS flow: 2 Round Trips and 1 Round Trip
 
 
 
@@ -155,7 +161,7 @@ TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
 
 **The client sends a list of cipher suites it supports**, and the server picks one they both understand.
 
-##### 4.2.2 What is a Digital Certificate?
+##### What is a Digital Certificate?
 
 Think of it like a **digital passport** for a website:
 
@@ -636,5 +642,4 @@ For larger data:
 
 ## 5. Automata Flow for TLS
 
-
-![TLS  Automata](./tls.png)
+![TLS Automata](./assets/tls.png)
