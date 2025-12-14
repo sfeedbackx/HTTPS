@@ -1,0 +1,434 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.6//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_6.dtd'>
+<nta>
+	<declaration>
+// Channels for TLS handshake and HTTP
+broadcast chan client_hello, server_hello, certificate_send;
+broadcast chan key_exchange, finished_send, http_request, http_response;
+broadcast chan attacker_intercept, attacker_forward;
+
+// Certificate structure
+typedef struct {
+    int[0,1000] server_id;
+    int[0,1000] ca_signature;
+    bool valid;
+    bool self_signed;
+} Certificate;
+
+// TLS Message structure
+typedef struct {
+    int[0,1000] nonce;
+    int[0,1000] session_key;
+    bool encrypted;
+    Certificate cert;
+} TLSMessage;
+
+// Generic HTTP/APP message structure (generic payload, not an explicit money transfer)
+typedef struct {
+    int[0,1000] payload;    // generic content identifier / value
+    bool encrypted;         // whether payload is protected by TLS
+    int[0,1000] hmac;       // small integrity token (modelled as an int)
+} HTTPMessage;
+
+// Global messages and helper variables
+TLSMessage client_tls, server_tls;
+HTTPMessage http_req, http_resp;
+Certificate received_cert, legitimate_cert, fake_cert;
+int[0,1000] original_payload = 0;        // what the client intended to send
+int[0,1000] server_received_payload = 0; // copy of payload the server actually processes
+
+// Security state
+bool tls_established = false;
+bool cert_validated = true;
+bool mitm_active = true;
+bool attack_detected = false;
+
+// Session keys
+int[0,1000] client_session_key = 0;
+int[0,1000] server_session_key = 0;
+int[0,1000] attacker_session_key = 0;
+
+// Attack tracking
+bool cert_spoofed = false;
+int[0,10] attack_count = 0;
+
+// Constants
+const int LEGITIMATE_SERVER = 100;
+const int ATTACKER_ID = 666;
+const int TRUSTED_CA = 50;
+const int FAKE_CA = 999;  // Attacker's CA, pre-installed via previous attack
+const int ATTACKER_PAYLOAD = 777;       // payload the attacker may substitute
+const int ATTACKER_RESP_PAYLOAD = 888;  // response payload attacker may substitute
+
+</declaration>
+	<template>
+		<name>Client</name>
+		<declaration>clock c;
+int[0,1000] my_nonce = 0;</declaration>
+		<location id="id0" x="0" y="0">
+			<name x="-10" y="-30">Idle</name>
+		</location>
+		<location id="id1" x="200" y="0">
+			<name x="153" y="-42">SendClientHello</name>
+		</location>
+		<location id="id2" x="400" y="0">
+			<name x="348" y="-42">WaitServerHello</name>
+			<label kind="invariant" x="391" y="25">c&lt;=5</label>
+		</location>
+		<location id="id3" x="600" y="0">
+			<name x="569" y="-42">ReceivingCert</name>
+			<committed/>
+		</location>
+		<location id="id4" x="800" y="0">
+			<name x="782" y="-42">ValidatingCert</name>
+			<label kind="invariant" x="790" y="34">c&lt;=2</label>
+		</location>
+		<location id="id5" x="1088" y="-153">
+			<name x="1078" y="-183">CertValid</name>
+			<committed/>
+		</location>
+		<location id="id6" x="1288" y="-153">
+			<name x="1249" y="-195">SendKeyExchange</name>
+			<committed/>
+		</location>
+		<location id="id7" x="1488" y="-153">
+			<name x="1478" y="-183">TLSEstablished</name>
+		</location>
+		<location id="id8" x="1487" y="68">
+			<name x="1362" y="34">SendHTTPRequest</name>
+		</location>
+		<location id="id9" x="1487" y="168">
+			<name x="1477" y="138">ReceiveHTTPResponse</name>
+		</location>
+		<location id="id10" x="1287" y="168">
+			<name x="1277" y="138">Success</name>
+		</location>
+		<location id="id11" x="1087" y="268">
+			<name x="1077" y="238">Compromised</name>
+		</location>
+		<init ref="id0"/>
+		<transition id="id12">
+			<source ref="id0"/>
+			<target ref="id1"/>
+			<label kind="assignment" x="50" y="-20">my_nonce:=1, c:=0</label>
+		</transition>
+		<transition id="id13">
+			<source ref="id1"/>
+			<target ref="id2"/>
+			<label kind="synchronisation" x="250" y="-20">client_hello!</label>
+			<label kind="assignment" x="229" y="8">client_tls.nonce:=my_nonce</label>
+		</transition>
+		<transition id="id14">
+			<source ref="id2"/>
+			<target ref="id3"/>
+			<label kind="synchronisation" x="450" y="-20">attacker_forward?</label>
+		</transition>
+		<transition id="id15">
+			<source ref="id3"/>
+			<target ref="id4"/>
+			<label kind="assignment" x="629" y="8">received_cert:=server_tls.cert, c:=0</label>
+		</transition>
+		<transition id="id16">
+			<source ref="id4"/>
+			<target ref="id5"/>
+			<label kind="guard" x="816" y="-161">c&gt;=1 &amp;&amp;
+ received_cert.valid &amp;&amp; 
+				(received_cert.ca_signature==TRUSTED_CA ||
+ received_cert.ca_signature==FAKE_CA)</label>
+			<label kind="assignment" x="909" y="-68">cert_validated:=true</label>
+		</transition>
+		<transition id="id17">
+			<source ref="id5"/>
+			<target ref="id6"/>
+		</transition>
+		<transition id="id18">
+			<source ref="id6"/>
+			<target ref="id7"/>
+			<label kind="synchronisation" x="1338" y="-173">key_exchange!</label>
+			<label kind="assignment" x="1326" y="-144">client_session_key:=my_nonce+server_tls.nonce, 
+tls_established:=true</label>
+		</transition>
+		<transition id="id19">
+			<source ref="id7"/>
+			<target ref="id8"/>
+			<label kind="assignment" x="1504" y="-93">original_payload:=1,
+http_req.payload:=original_payload,
+http_req.encrypted:=tls_established,
+http_req.hmac:=1</label>
+		</transition>
+		<transition id="id20">
+			<source ref="id8"/>
+			<target ref="id9"/>
+			<label kind="synchronisation" x="1417" y="88">http_request!</label>
+		</transition>
+		<transition id="id21">
+			<source ref="id9"/>
+			<target ref="id10"/>
+			<label kind="guard" x="1351" y="127">cert_validated</label>
+			<label kind="synchronisation" x="1343" y="144">http_response?</label>
+		</transition>
+		<transition id="id22">
+			<source ref="id9"/>
+			<target ref="id11"/>
+			<label kind="guard" x="1237" y="195">!cert_validated</label>
+			<label kind="synchronisation" x="1237" y="212">http_response?</label>
+		</transition>
+	</template>
+	<template>
+		<name>Server</name>
+		<declaration>clock s;
+int[0,1000] my_nonce = 0;</declaration>
+		<location id="id23" x="-136" y="0">
+			<name x="-146" y="-30">Listening</name>
+		</location>
+		<location id="id24" x="178" y="0">
+			<name x="142" y="-38">RecvClientHello</name>
+			<committed/>
+		</location>
+		<location id="id25" x="400" y="0">
+			<name x="390" y="-30">PrepareServerHello</name>
+			<label kind="invariant" x="390" y="15">s&lt;=1</label>
+		</location>
+		<location id="id26" x="748" y="0">
+			<name x="706" y="-34">SendCertificate</name>
+		</location>
+		<location id="id27" x="973" y="0">
+			<name x="935" y="-42">WaitKeyExchange</name>
+			<label kind="invariant" x="963" y="15">s&lt;=5</label>
+		</location>
+		<location id="id28" x="1258" y="0">
+			<name x="1248" y="-30">TLSReady</name>
+		</location>
+		<location id="id29" x="1436" y="0">
+			<name x="1411" y="-34">RecvHTTPRequest</name>
+		</location>
+		<location id="id30" x="1691" y="0">
+			<name x="1681" y="-30">ProcessRequest</name>
+			<label kind="invariant" x="1681" y="15">s&lt;=2</label>
+		</location>
+		<location id="id31" x="1708" y="331">
+			<name x="1698" y="301">SendHTTPResponse</name>
+		</location>
+		<init ref="id23"/>
+		<transition id="id32">
+			<source ref="id23"/>
+			<target ref="id24"/>
+			<label kind="synchronisation" x="-42" y="-25">attacker_intercept?</label>
+		</transition>
+		<transition id="id33">
+			<source ref="id24"/>
+			<target ref="id25"/>
+			<label kind="assignment" x="221" y="-25">my_nonce:=2, s:=0</label>
+		</transition>
+		<transition id="id34">
+			<source ref="id25"/>
+			<target ref="id26"/>
+			<label kind="guard" x="450" y="-20">s&gt;=1</label>
+			<label kind="assignment" x="459" y="8">server_tls.nonce:=my_nonce,
+legitimate_cert.server_id:=LEGITIMATE_SERVER, 
+legitimate_cert.ca_signature:=TRUSTED_CA,
+legitimate_cert.valid:=true,
+server_tls.cert:=legitimate_cert</label>
+		</transition>
+		<transition id="id35">
+			<source ref="id26"/>
+			<target ref="id27"/>
+			<label kind="synchronisation" x="823" y="-20">server_hello!</label>
+		</transition>
+		<transition id="id36">
+			<source ref="id27"/>
+			<target ref="id28"/>
+			<label kind="synchronisation" x="1023" y="-20">attacker_intercept?</label>
+			<label kind="assignment" x="1028" y="8">server_session_key:=my_nonce+client_tls.nonce,
+s:=0</label>
+		</transition>
+		<transition id="id37">
+			<source ref="id28"/>
+			<target ref="id29"/>
+		</transition>
+		<transition id="id38">
+			<source ref="id29"/>
+			<target ref="id30"/>
+			<label kind="synchronisation" x="1486" y="-20">attacker_intercept?</label>
+			<label kind="assignment" x="1470" y="8">s:=0,
+server_received_payload:=http_req.payload</label>
+		</transition>
+		<transition id="id39">
+			<source ref="id30"/>
+			<target ref="id31"/>
+			<label kind="guard" x="1657" y="136">s&gt;=1</label>
+			<label kind="assignment" x="1487" y="162">http_resp.payload:=server_received_payload, http_resp.encrypted:=true, http_resp.hmac:=1</label>
+		</transition>
+		<transition id="id40">
+			<source ref="id31"/>
+			<target ref="id23"/>
+			<label kind="synchronisation" x="218" y="332">http_response!</label>
+			<nail x="1717" y="415"/>
+			<nail x="-119" y="408"/>
+		</transition>
+	</template>
+	<template>
+		<name>Attacker</name>
+		<declaration>clock a;
+bool has_fake_cert = false;</declaration>
+		<location id="id41" x="0" y="0">
+			<name x="-10" y="-30">Passive</name>
+		</location>
+		<location id="id42" x="200" y="0">
+			<name x="190" y="-30">PrepareFakeCert</name>
+			<label kind="invariant" x="190" y="15">a&lt;=2</label>
+		</location>
+		<location id="id43" x="527" y="0">
+			<name x="517" y="-30">ActiveMITM</name>
+		</location>
+		<location id="id44" x="981" y="2">
+			<name x="971" y="-28">InterceptClientHello</name>
+			<committed/>
+		</location>
+		<location id="id45" x="1283" y="0">
+			<name x="1273" y="-30">ForwardToServer</name>
+		</location>
+		<location id="id46" x="1283" y="100">
+			<name x="1273" y="70">InterceptServerHello</name>
+			<committed/>
+		</location>
+		<location id="id47" x="981" y="102">
+			<name x="971" y="72">SpoofCertificate</name>
+			<committed/>
+		</location>
+		<location id="id48" x="570" y="100">
+			<name x="560" y="70">ForwardFakeCert</name>
+		</location>
+		<location id="id49" x="570" y="200">
+			<name x="510" y="161">InterceptKeyExchange</name>
+		</location>
+		<location id="id50" x="981" y="202">
+			<name x="901" y="161">EstablishFakeSession</name>
+		</location>
+		<location id="id51" x="1215" y="204">
+			<name x="1181" y="163">InterceptHTTP</name>
+			<committed/>
+		</location>
+		<location id="id52" x="1466" y="198">
+			<name x="1456" y="168">ModifyHTTPRequest</name>
+		</location>
+		<location id="id53" x="909" y="-153">
+			<name x="899" y="-183">ModifyHTTPResponse</name>
+		</location>
+		<init ref="id41"/>
+		<transition id="id54">
+			<source ref="id43"/>
+			<target ref="id53"/>
+		</transition>
+		<transition id="id55">
+			<source ref="id41"/>
+			<target ref="id42"/>
+			<label kind="assignment" x="50" y="-20">a:=0</label>
+		</transition>
+		<transition id="id56">
+			<source ref="id42"/>
+			<target ref="id43"/>
+			<label kind="assignment" x="255" y="0">has_fake_cert:=true,
+fake_cert.server_id:=LEGITIMATE_SERVER,
+fake_cert.ca_signature:=FAKE_CA,
+fake_cert.valid:=true,
+fake_cert.self_signed:=false</label>
+		</transition>
+		<transition id="id57">
+			<source ref="id43"/>
+			<target ref="id44"/>
+			<label kind="guard" x="620" y="-20">mitm_active</label>
+			<label kind="synchronisation" x="629" y="0">client_hello?</label>
+		</transition>
+		<transition id="id58">
+			<source ref="id44"/>
+			<target ref="id45"/>
+			<label kind="synchronisation" x="1079" y="-17">attacker_intercept!</label>
+		</transition>
+		<transition id="id59">
+			<source ref="id45"/>
+			<target ref="id46"/>
+			<label kind="synchronisation" x="1223" y="30">server_hello?</label>
+		</transition>
+		<transition id="id60">
+			<source ref="id46"/>
+			<target ref="id47"/>
+			<label kind="assignment" x="1088" y="102">cert_spoofed:=true,
+attack_count++</label>
+		</transition>
+		<transition id="id61">
+			<source ref="id47"/>
+			<target ref="id48"/>
+			<label kind="assignment" x="714" y="76">server_tls.cert:=fake_cert</label>
+		</transition>
+		<transition id="id62">
+			<source ref="id48"/>
+			<target ref="id49"/>
+			<label kind="synchronisation" x="510" y="127">attacker_forward!</label>
+		</transition>
+		<transition id="id63">
+			<source ref="id49"/>
+			<target ref="id50"/>
+			<label kind="synchronisation" x="620" y="180">key_exchange?</label>
+			<label kind="assignment" x="646" y="204">attacker_session_key:=123</label>
+		</transition>
+		<transition id="id64">
+			<source ref="id50"/>
+			<target ref="id51"/>
+			<label kind="synchronisation" x="1011" y="178">attacker_intercept!</label>
+		</transition>
+		<transition id="id65">
+			<source ref="id51"/>
+			<target ref="id52"/>
+			<label kind="synchronisation" x="1283" y="178">http_request?</label>
+		</transition>
+		<transition id="id66">
+			<source ref="id52"/>
+			<target ref="id43"/>
+			<label kind="synchronisation" x="510" y="289">attacker_intercept!</label>
+			<label kind="assignment" x="790" y="289">http_req.payload:=ATTACKER_PAYLOAD,
+http_req.hmac:=999</label>
+			<nail x="1479" y="289"/>
+			<nail x="425" y="280"/>
+		</transition>
+	</template>
+	<system>system Client, Server, Attacker;</system>
+	<queries>
+		<query>
+			<formula>A[] not deadlock</formula>
+			<comment>System is deadlock-free</comment>
+			<result outcome="failure" type="quality" timestamp="2025-12-14 14:48:28 +0100">
+			</result>
+		</query>
+		<query>
+			<formula>E&lt;&gt; cert_spoofed</formula>
+			<comment>Attacker can spoof certificate</comment>
+			<result outcome="success" type="quality" timestamp="2025-12-14 14:48:29 +0100">
+			</result>
+		</query>
+		<query>
+			<formula>E&lt;&gt; (Client.Success &amp;&amp; cert_spoofed)</formula>
+			<comment/>
+			<result outcome="success" type="quality" timestamp="2025-12-14 14:48:31 +0100">
+			</result>
+		</query>
+		<query>
+			<formula>E&lt;&gt; (http_req.payload==ATTACKER_PAYLOAD)</formula>
+			<comment>Attacker can modify the client's request payload.</comment>
+			<result outcome="success" type="quality" timestamp="2025-12-14 14:48:32 +0100">
+			</result>
+		</query>
+		<query>
+			<formula>E&lt;&gt; (http_resp.payload==ATTACKER_RESP_PAYLOAD)</formula>
+			<comment>Attacker can modify the server's response payload.</comment>
+			<result outcome="failure" type="quality" timestamp="2025-12-14 14:48:33 +0100">
+			</result>
+		</query>
+		<query>
+			<formula>E&lt;&gt; (server_received_payload!=original_payload)</formula>
+			<comment>Server may receive a different payload than the client intended (detects MITM modification).</comment>
+			<result outcome="success" type="quality" timestamp="2025-12-14 14:48:35 +0100">
+			</result>
+		</query>
+	</queries>
+</nta>
