@@ -312,20 +312,13 @@ bool has_fake_cert = false;</declaration>
 		<location id="id52" x="1466" y="198">
 			<name x="1456" y="168">ModifyHTTPRequest</name>
 		</location>
-		<location id="id53" x="909" y="-153">
-			<name x="899" y="-183">ModifyHTTPResponse</name>
-		</location>
 		<init ref="id41"/>
-		<transition id="id54">
-			<source ref="id43"/>
-			<target ref="id53"/>
-		</transition>
-		<transition id="id55">
+		<transition id="id53">
 			<source ref="id41"/>
 			<target ref="id42"/>
 			<label kind="assignment" x="50" y="-20">a:=0</label>
 		</transition>
-		<transition id="id56">
+		<transition id="id54">
 			<source ref="id42"/>
 			<target ref="id43"/>
 			<label kind="assignment" x="255" y="0">has_fake_cert:=true,
@@ -334,55 +327,55 @@ fake_cert.ca_signature:=FAKE_CA,
 fake_cert.valid:=true,
 fake_cert.self_signed:=false</label>
 		</transition>
-		<transition id="id57">
+		<transition id="id55">
 			<source ref="id43"/>
 			<target ref="id44"/>
 			<label kind="guard" x="620" y="-20">mitm_active</label>
 			<label kind="synchronisation" x="629" y="0">client_hello?</label>
 		</transition>
-		<transition id="id58">
+		<transition id="id56">
 			<source ref="id44"/>
 			<target ref="id45"/>
 			<label kind="synchronisation" x="1079" y="-17">attacker_intercept!</label>
 		</transition>
-		<transition id="id59">
+		<transition id="id57">
 			<source ref="id45"/>
 			<target ref="id46"/>
 			<label kind="synchronisation" x="1223" y="30">server_hello?</label>
 		</transition>
-		<transition id="id60">
+		<transition id="id58">
 			<source ref="id46"/>
 			<target ref="id47"/>
 			<label kind="assignment" x="1088" y="102">cert_spoofed:=true,
 attack_count++</label>
 		</transition>
-		<transition id="id61">
+		<transition id="id59">
 			<source ref="id47"/>
 			<target ref="id48"/>
 			<label kind="assignment" x="714" y="76">server_tls.cert:=fake_cert</label>
 		</transition>
-		<transition id="id62">
+		<transition id="id60">
 			<source ref="id48"/>
 			<target ref="id49"/>
 			<label kind="synchronisation" x="510" y="127">attacker_forward!</label>
 		</transition>
-		<transition id="id63">
+		<transition id="id61">
 			<source ref="id49"/>
 			<target ref="id50"/>
 			<label kind="synchronisation" x="620" y="180">key_exchange?</label>
 			<label kind="assignment" x="646" y="204">attacker_session_key:=123</label>
 		</transition>
-		<transition id="id64">
+		<transition id="id62">
 			<source ref="id50"/>
 			<target ref="id51"/>
 			<label kind="synchronisation" x="1011" y="178">attacker_intercept!</label>
 		</transition>
-		<transition id="id65">
+		<transition id="id63">
 			<source ref="id51"/>
 			<target ref="id52"/>
 			<label kind="synchronisation" x="1283" y="178">http_request?</label>
 		</transition>
-		<transition id="id66">
+		<transition id="id64">
 			<source ref="id52"/>
 			<target ref="id43"/>
 			<label kind="synchronisation" x="510" y="289">attacker_intercept!</label>
